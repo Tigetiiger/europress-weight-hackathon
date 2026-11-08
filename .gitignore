@@ -31,3 +31,6 @@ node_modules/
 # --- Secrets ---
 .env
 .env.*
+
+# --- Local tooling (Claude Code worktrees and settings) ---
+.claude/

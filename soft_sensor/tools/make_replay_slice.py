@@ -1,17 +1,19 @@
-"""Cut a small demo slice out of a full simulator run.
+"""Cut the replay slice the dashboard serves out of a full simulator run.
 
 The full ``runs/full400`` telemetry is ~215 MB, too large to ship. The dashboard's live
 weight tab only needs the replay window (test period) plus a lookback for features, so
 this script keeps:
 
-* ``PER_MATERIAL`` machines per material (always including ``ALWAYS``),
+* every machine (or ``--per-material N`` per material, always including ``ALWAYS``),
 * rows from ``test_start - LOOKBACK_DAYS`` to the end of the run,
 * every region's daily weather (small).
 
-Usage (after regenerating the full run, see README):
+With ``--predictions`` it also trims the hourly batch predictions to the same window.
 
-    python tools/make_demo_slice.py --src runs/full400 --dst runs/demo40 \
-        --metrics models/full400/metrics.json
+Usage (after simulating and training, see README / scripts/build_data.sh):
+
+    python tools/make_replay_slice.py --src runs/full400 --dst runs/replay400 \
+        --metrics models/full400/metrics.json --predictions models/full400/predictions.parquet
 """
 from __future__ import annotations
 
@@ -22,7 +24,7 @@ from pathlib import Path
 
 import pandas as pd
 
-PER_MATERIAL = 10
+PER_MATERIAL = 0               # 0 = keep every machine
 ALWAYS = ("BIN-0001",)          # default machine opened by the dashboard
 LOOKBACK_DAYS = 40              # matches softsensor Settings.lookback_days
 TIME_SERIES = ("hourly", "strokes", "lifts", "pressure_curves")
@@ -30,6 +32,8 @@ COPY_AS_IS = ("weather_daily.parquet", "summary.json", "config_used.yaml")
 
 
 def pick_machines(bins: pd.DataFrame, per_material: int, always: tuple[str, ...]) -> list[str]:
+    if per_material <= 0:
+        return sorted(bins["bin_id"])
     chosen = [b for b in always if b in set(bins["bin_id"])]
     for _, group in bins.sort_values("bin_id").groupby("material"):
         have = sum(b in chosen for b in group["bin_id"])
@@ -50,7 +54,8 @@ def main() -> None:
     parser.add_argument("--dst", type=Path, required=True)
     parser.add_argument("--metrics", type=Path, required=True)
     parser.add_argument("--split", default="time")
-    parser.add_argument("--per-material", type=int, default=PER_MATERIAL)
+    parser.add_argument("--per-material", type=int, default=PER_MATERIAL, help="0 = all machines")
+    parser.add_argument("--predictions", type=Path, help="batch predictions.parquet to trim in place to the window")
     args = parser.parse_args()
 
     args.dst.mkdir(parents=True, exist_ok=True)
@@ -70,6 +75,13 @@ def main() -> None:
     for name in COPY_AS_IS:
         if (args.src / name).is_file():
             shutil.copy2(args.src / name, args.dst / name)
+    if args.predictions and args.predictions.is_file():
+        pred = pd.read_parquet(args.predictions)
+        pred = pred[(pred["ts"] >= since) & pred["bin_id"].isin(keep)]
+        tmp = args.predictions.with_suffix(".tmp")
+        pred.to_parquet(tmp, index=False, compression="zstd")
+        tmp.replace(args.predictions)
+        print(f"predictions: {len(pred):,} rows (trimmed in place)")
     (args.dst / "SLICE.json").write_text(json.dumps(
         {"source": str(args.src), "machines": keep, "since": str(since)}, indent=2))
     print(f"{len(keep)} machines since {since} -> {args.dst}")

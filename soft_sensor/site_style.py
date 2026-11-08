@@ -164,7 +164,7 @@ def terms_json(glossary: dict[str, str]) -> str:
 
 def page(title: str, body: str, nav: str = "", glossary: dict[str, str] | None = None) -> str:
     extra = (terms_json(glossary) + TOOLTIP) if glossary else ""
-    return (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+    return (f'<!doctype html><html lang="en"><head><meta charset="utf-8"><link rel="icon" href="/img/smart-favicon.svg">'
             f'<meta name="viewport" content="width=device-width,initial-scale=1"><title>{escape(title)}</title>'
             f'<meta name="color-scheme" content="light dark"><style>{CSS}</style></head><body>'
             f'<div class="layout">{nav}<main>{body}</main></div>{extra}{LIGHTBOX}{TOC_SPY if nav else ""}</body></html>')

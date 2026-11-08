@@ -13,7 +13,7 @@ DEFAULT_SIM_ROOT = str(Path(__file__).resolve().parents[2] / "soft_sensor")
 @dataclass(frozen=True)
 class Settings:
     sim_root: Path
-    run: str = "demo40"             # runs/<run>: simulated telemetry (demo40 = shipped 40-machine slice)
+    run: str = "replay400"          # runs/<run>: telemetry (replay400 = all 400 machines, test period + lookback)
     models: str = "full400"         # models/<models>: trained bundles + batch predictions
     split: str = "time"             # bundle used for live inference ("time" = pilot fleet)
     host: str = "127.0.0.1"
@@ -38,7 +38,7 @@ class Settings:
         env = os.environ
         return cls(
             sim_root=Path(env.get("SOFTSENSOR_SIM_ROOT", DEFAULT_SIM_ROOT)),
-            run=env.get("SOFTSENSOR_RUN", "demo40"),
+            run=env.get("SOFTSENSOR_RUN", "replay400"),
             models=env.get("SOFTSENSOR_MODELS", "full400"),
             split=env.get("SOFTSENSOR_SPLIT", "time"),
             host=env.get("SOFTSENSOR_HOST", "127.0.0.1"),
