@@ -1,0 +1,16 @@
+[Unit]
+Description=Europress SMART hydraulic soft sensor API (LightGBM, synthetic data)
+After=network-online.target
+
+[Service]
+WorkingDirectory=/home/hackathon/final_codebase/dashboard
+Environment=SOFTSENSOR_SIM_ROOT=/home/hackathon/final_codebase/soft_sensor SOFTSENSOR_RUN=demo40 SOFTSENSOR_MODELS=full400 SOFTSENSOR_SPLIT=time SOFTSENSOR_HOST=127.0.0.1 SOFTSENSOR_PORT=8093 OMP_NUM_THREADS=4
+ExecStart=/home/hackathon/final_codebase/.venv/bin/python -m softsensor
+Restart=always
+RestartSec=3
+MemoryMax=4G
+StandardOutput=append:/home/hackathon/final_codebase/dashboard/logs/softsensor.log
+StandardError=append:/home/hackathon/final_codebase/dashboard/logs/softsensor.log
+
+[Install]
+WantedBy=default.target

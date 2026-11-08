@@ -1,0 +1,33 @@
+# --- Model weights (LightGBM boosters + SHAP tables); retrain with soft_sensor/weight_train ---
+soft_sensor/models/*/time/
+soft_sensor/models/*/bins/
+*.joblib
+*.pkl
+*.lgb
+
+# --- Large generated outputs ---
+# simulator runs: regenerate with `python -m compactor_sim ...` (see soft_sensor/README.md)
+soft_sensor/runs/
+# training plots (copied into soft_sensor/site/img by make_site.py)
+soft_sensor/models/*/plots/
+# high-resolution figure copies: regenerate with soft_sensor/make_hires_plots.py
+soft_sensor/site/img/**/*@hires.png
+# large docs download: regenerate with soft_sensor/make_site.py
+soft_sensor/site/downloads/lift-events.csv
+*.parquet
+
+# --- Runtime / caches ---
+dashboard/logs/
+logs/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+node_modules/
+.impeccable/
+.DS_Store
+
+# --- Secrets ---
+.env
+.env.*

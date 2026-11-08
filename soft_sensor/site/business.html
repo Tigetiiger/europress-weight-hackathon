@@ -1,0 +1,217 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Europress SMART — business model</title><meta name="color-scheme" content="light dark"><style>
+:root{--bg:#fbfaf7;--fg:#1c2026;--muted:#5b6370;--card:#ffffff;--line:#d9dcd3;--rule:#2d3136;--accent:#2f5d8a;
+--good:#e3efe3;--good-fg:#1f4d2a;--code:#f0efe9;--tip-bg:#23272e;--tip-fg:#f3f4f6;--mark:#f3efdc}
+@media (prefers-color-scheme:dark){:root{--bg:#15181d;--fg:#dde1e6;--muted:#9aa3ad;--card:#1c2026;--line:#333941;
+--rule:#c9ced5;--accent:#8fb4dc;--good:#1d3324;--good-fg:#a9dcb5;--code:#242a32;--tip-bg:#f3f4f6;--tip-fg:#1c2026;--mark:#2d2b22}}
+*{box-sizing:border-box}html{scroll-padding-top:1.2rem;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 Georgia,"Iowan Old Style","Palatino Linotype",
+"Source Serif Pro",serif;-webkit-text-size-adjust:100%}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);max-width:1240px;margin:0 auto;padding:0 16px}
+@media (min-width:1000px){.layout{grid-template-columns:250px minmax(0,1fr);gap:2.5rem}
+nav.toc{position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;padding:1.6rem 0 2rem}}
+nav.toc{font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:1rem 0 .4rem;border-bottom:1px solid var(--line)}
+@media (min-width:1000px){nav.toc{border-bottom:0}}
+nav.toc p{margin:0 0 .5rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:.75rem;color:var(--muted)}
+nav.toc ol{list-style:none;margin:0;padding:0}nav.toc ol ol{padding-left:1.4rem;margin:.15rem 0 .35rem}
+nav.toc li{margin:.15rem 0}nav.toc a{color:var(--fg);text-decoration:none}nav.toc a:hover{color:var(--accent);text-decoration:underline}
+nav.toc .n{color:var(--muted);display:inline-block;min-width:1.6em}nav.toc ol ol .n{min-width:2.4em}
+@media (max-width:999px){nav.toc ol ol{display:none}nav.toc ol{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 1rem}}
+main{min-width:0;padding-bottom:3rem}
+section{padding-top:2.4rem}section.doc-head{padding-top:1.8rem}
+h1{font-size:clamp(1.55rem,3.2vw,2.15rem);line-height:1.25;margin:.4rem 0 .6rem;font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.5rem;line-height:1.3;margin:0 0 1rem;padding-bottom:.35rem;border-bottom:2px solid var(--rule)}
+h3{font-size:1.15rem;margin:2rem 0 .6rem}h4{font-size:1rem;margin:1.5rem 0 .4rem;font-family:system-ui,sans-serif}
+h2 .n,h3 .n,h4 .n{color:var(--muted);font-weight:400;margin-right:.5em}
+a{color:var(--accent)}p,li,dd{max-width:72ch}.muted{color:var(--muted)}
+.abstract{font-size:1.02rem;border-left:3px solid var(--rule);padding:.2rem 0 .2rem 1rem;margin:1.2rem 0}
+.meta{font:14px/1.5 system-ui,sans-serif;color:var(--muted);margin:.4rem 0 1rem}
+.notice{border:1px solid var(--line);background:var(--code);padding:.6rem .9rem;border-radius:4px;font-family:system-ui,sans-serif;font-size:.92rem}
+.note{color:var(--muted);font-style:italic;border:1px dashed var(--line);padding:.5rem .8rem;border-radius:4px}
+.tcap,figcaption{font:.86rem/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--muted)}
+.tcap{margin:1.4rem 0 .35rem;max-width:none}.tcap b,figcaption b{color:var(--fg);font-weight:600}
+.tbl{overflow-x:auto;margin:0 0 1rem;max-width:100%}
+table{border-collapse:collapse;font:.875rem/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;width:100%}
+th,td{padding:.32rem .65rem;text-align:right;border-bottom:1px solid var(--line);vertical-align:top;white-space:nowrap}
+th{border-bottom:2px solid var(--rule);font-weight:600;text-align:right;background:transparent;white-space:normal;min-width:6ch}
+td:first-child,th:first-child,td.l,th.l{text-align:left}td.l,th.l{white-space:normal;min-width:12ch}
+td.good{background:var(--good);color:var(--good-fg);font-weight:600}
+th.lift,td.lift{background:var(--mark)}tr.key td{font-weight:700}tr.fam td{background:var(--code);font-weight:600;text-align:left}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--code);padding:.05rem .3rem;border-radius:3px;font-size:.88em}
+pre{background:var(--code);padding:.8rem 1rem;border-radius:4px;overflow-x:auto;font-size:.82rem;line-height:1.5;border-left:3px solid var(--line)}
+pre code{padding:0;background:none;font-size:inherit}
+.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:1.2rem;margin:1rem 0 1.4rem}
+.figs.one{grid-template-columns:minmax(0,1fr);max-width:860px}
+figure{margin:0}figure img{max-width:100%;height:auto;display:block;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:3px}
+figcaption{margin-top:.45rem}a.zoom img{cursor:zoom-in}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:.5rem;margin:1rem 0;font-family:system-ui,sans-serif}
+.flow .box{flex:1 1 180px;background:var(--card);border:1px solid var(--line);border-top:3px solid var(--rule);padding:.6rem .8rem;font-size:.86rem}
+.flow .box b{display:block;font-size:.95rem;margin-bottom:.25rem}.flow .box ul{margin:.2rem 0;padding-left:1.1rem}
+.flow .arrow{align-self:center;font-size:1.5rem;color:var(--muted)}
+@media (max-width:760px){.flow{flex-direction:column}.flow .arrow{transform:rotate(90deg);text-align:center}}
+.bars{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:1rem;font-family:system-ui,sans-serif}
+.bar-card{background:var(--card);border:1px solid var(--line);padding:.6rem .8rem}
+.bar-card h5{margin:.1rem 0 .5rem;font-size:.92rem}.bar{display:grid;grid-template-columns:11rem 1fr 3.2rem;gap:.4rem;align-items:center;font-size:.8rem;margin:.15rem 0}
+.bar code{font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bar .track{background:var(--code);height:.7rem}
+.bar .fill{background:var(--accent);height:100%}.bar span{text-align:right;color:var(--muted)}
+dl.gloss{font-size:.95rem}dl.gloss dt{font-weight:700;margin-top:.7rem}dl.gloss dt code{font-weight:700}
+dl.gloss dt .cat{font:.72rem/1 system-ui,sans-serif;color:var(--muted);font-weight:400;margin-left:.5em;text-transform:uppercase;letter-spacing:.04em}
+dl.gloss dd{margin:.1rem 0 0 0}
+ul.dl{list-style:none;padding:0;margin:0}ul.dl li{border-bottom:1px solid var(--line);padding:.6rem 0;max-width:none}
+ul.dl li a{font-weight:600}ul.dl .sz{font:.8rem system-ui,sans-serif;color:var(--muted);margin-left:.5em}ul.dl .d{display:block;font-size:.92rem;max-width:80ch}
+.term{border-bottom:1px dotted var(--muted);cursor:help;text-decoration:none;color:inherit}
+.term:focus{outline:2px solid var(--accent);outline-offset:1px}
+#tip{position:fixed;z-index:60;max-width:min(340px,calc(100vw - 16px));background:var(--tip-bg);color:var(--tip-fg);padding:.5rem .7rem;
+border-radius:5px;font:.83rem/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.25);pointer-events:none}
+#tip[hidden]{display:none}#tip b{display:block;margin-bottom:.15rem}
+.lb{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;cursor:zoom-out}
+.lb[hidden]{display:none}.lb img{max-width:100%;max-height:calc(100vh - 7rem);object-fit:contain;background:#fff;border-radius:4px}
+.lb-x{position:fixed;top:12px;right:12px;width:3rem;height:3rem;border-radius:50%;border:0;background:#fff;color:#000;font-size:1.8rem;line-height:1;cursor:pointer}
+.lb-cap{color:#eee;font:.9rem system-ui,sans-serif;margin:.6rem 0 0;text-align:center;max-width:90ch}.lb-cap a{color:#9cc8ff}
+nav.toc.spy li.has-sub:not(.open)>ol{display:none}
+nav.toc a[aria-current]{color:var(--accent);font-weight:700}nav.toc ol ol a[aria-current]{font-weight:600}
+nav.toc a[aria-current] .n{color:var(--accent)}
+details.gallery{margin:1.2rem 0 .4rem;border:1px solid var(--line);border-radius:6px;background:var(--card);
+font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+details.gallery>summary{cursor:pointer;padding:.75rem 1rem;font-weight:600;font-size:1rem}
+details.gallery>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+details.gallery[open]>summary{border-bottom:1px solid var(--line)}
+.gnote{margin:.8rem 1rem .2rem;color:var(--muted);font-size:.88rem;max-width:none}
+ol.glist{list-style:none;margin:0;padding:.6rem 1rem 1rem;display:grid;gap:1.1rem 1.4rem;
+grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr))}
+li.gitem{max-width:none;margin:0;border-top:1px solid var(--line);padding-top:.8rem;min-width:0}
+li.gitem img{width:100%;height:auto;display:block;background:#fff;border:1px solid var(--line);border-radius:3px;cursor:zoom-in}
+li.gitem img[data-src]{min-height:180px}
+.gtext p{margin:.5rem 0 0;font-size:.86rem;line-height:1.5;max-width:none}.gtext p.gtitle{font-weight:600}
+.gtext .gtitle a{text-decoration:none}
+figcaption .fdesc{display:block;margin-top:.3rem}
+.lb-res{font-style:normal;color:#bbb}
+footer{border-top:1px solid var(--line);margin-top:3rem;padding-top:1rem;font:.85rem/1.5 system-ui,sans-serif;color:var(--muted)}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.8rem;margin:1.4rem 0}
+.tile{border:1px solid var(--line);background:var(--card);border-radius:6px;padding:.8rem 1rem;font-family:system-ui,sans-serif}
+.tile b{display:block;font-size:1.7rem;line-height:1.1;letter-spacing:-.01em;color:var(--fg)}
+.tile span{display:block;font-size:.86rem;color:var(--muted);margin-top:.25rem;line-height:1.35}
+.sides{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.8rem;margin:1rem 0}
+.side{border:1px solid var(--line);border-top:3px solid var(--accent);background:var(--card);border-radius:4px;padding:.8rem 1rem}
+.side h3{margin:0 0 .4rem;font-size:1.05rem}.side p{margin:.35rem 0;font-size:.95rem}
+.side .lbl{font:600 .75rem/1.3 system-ui,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);display:block;margin-top:.6rem}
+td.l,th.l{text-align:left;white-space:normal}
+.links a{display:inline-block;margin:.2rem .9rem .2rem 0}
+</style></head>
+<body><div class="layout"><nav class="toc" aria-label="Contents"><a href="/" style="display:inline-block;margin:0 0 1rem;font-size:.85rem;color:var(--muted);text-decoration:none">← SMART Weight home</a><p>Contents</p><ol><li><a href="#summary"><span class="n">0</span>Summary</a></li><li><a href="#problem"><span class="n">1</span>The problem</a></li><li><a href="#built"><span class="n">2</span>What we built</a></li><li><a href="#sides"><span class="n">3</span>Three sides, one system</a></li><li><a href="#money"><span class="n">4</span>How the money is made</a></li><li><a href="#scenarios"><span class="n">5</span>Scenarios</a></li><li><a href="#trust"><span class="n">6</span>Trust and control</a></li><li><a href="#future"><span class="n">7</span>Next step: real weight</a></li><li><a href="#demo"><span class="n">8</span>See it in the demo</a></li><li><a href="#assume"><span class="n">9</span>Assumptions</a></li><li><a href="index.html"><span class="n">→</span>Technical documentation</a></li></ol></nav><main><section class="doc-head"><h1>Europress SMART — business model</h1>
+<p class="meta">Europress × Since AI Hackathon 2026 — business side. Companion to the <a href="index.html">technical documentation</a>. Detailed version: <a href="https://claude.ai/artifact/MeVR2iDqkQvdfK25AYEpMp">SMART Weight &amp; Insight</a>. Demo on synthetic data; all prices are hypothetical. Built 2026-11-07.</p>
+<p class="abstract">Europress builds compactors and balers, and SMART connects them. We turn the data SMART machines already send into the <b>weight of the waste</b> — no new firmware, no new hardware — and use it to win <b>more SMART subscriptions</b>. The customer pays a share of the money SMART predicts it saves. Waste-operator partners get a driver plan in return for sharing pickup, weight and invoice data through SMART.</p>
+<div class="tiles">
+<div class="tile"><b>5.3 %</b><span>mean weight error on machines the model never saw</span></div>
+<div class="tile"><b>€0</b><span>extra hardware: built from data SMART already has</span></div>
+<div class="tile"><b>€1.25M</b><span>a year in savings found for 52 demo customers</span></div>
+<div class="tile"><b>3,945</b><span>fewer truck trips a year for 5 demo partners</span></div>
+</div></section>
+
+<section id="summary"><h2><span class="n">0</span>Summary of the whole submission</h2>
+<ul>
+<li><b>Problem.</b> Weight decides what a customer pays, but only the waste operator knows it, after the truck has left. About 15 % of Europress customers are on SMART.</li>
+<li><b>What we built.</b> A weight model that reads the data SMART machines already send (fill, compaction, hydraulic pressure, weather): about <b>5.3 % off</b> on machines it never saw, with <b>€0</b> extra hardware. On top of it, one dashboard with three views.</li>
+<li><b>Customer.</b> Sees the approximate weight in every container and the expected charge before the truck comes, plus the savings SMART AI found. Demo hotel group: <b>€52,154 a year</b>, 37 % of its waste cost.</li>
+<li><b>Waste-operator partners (~20).</b> Share pickups, weights and invoice lines through SMART; get a driver plan, pickups 14 days ahead and the load before the truck leaves. Five demo partners: <b>3,945 fewer truck trips a year</b>.</li>
+<li><b>Europress.</b> More SMART subscriptions. SMART is paid with <b>a share of the money it predicts it saves</b>, agreed per customer (demo 25 % ≈ €311k a year on the demo fleet). Free is the bare minimum and fully manual: no weight, no fill levels, nothing automatic.</li>
+<li><b>Trust and control.</b> Europress never sells data to third parties; data is only exchanged when both parties agree.</li>
+<li><b>Next step.</b> The model is trained on a simulated fleet today. After the demo, Europress may need to invest in <b>weighing the real output of a small group of compactors</b>, so the model can be retrained on real weights (<a href="#future">section 7</a>).</li>
+</ul>
+<p class="tcap"><b>Table 0.</b> Everything in the submission.</p>
+<div class="tbl"><table><thead><tr><th class="l">part</th><th class="l">what it shows</th><th class="l">open</th></tr></thead><tbody>
+<tr><td class="l">Business model</td><td class="l">this page: problem, the three sides, how the money is made, scenarios</td><td class="l"><a href="#problem">read below</a></td></tr>
+<tr><td class="l">Business model in detail</td><td class="l">the same model with more depth: weight accuracy by material, full Free vs SMART table, driver plan method, partner figures, sales leads, a fee calculator, demo walkthrough</td><td class="l"><a href="https://claude.ai/artifact/MeVR2iDqkQvdfK25AYEpMp">detailed version</a></td></tr>
+<tr><td class="l">Technical documentation</td><td class="l">the weight model: data, features, accuracy, how the simulated fleet was built, limitations</td><td class="l"><a href="index.html">/docs/</a></td></tr>
+<tr><td class="l">Dashboard — customer</td><td class="l">live container weight, expected charges, savings, machines, Free / SMART switch</td><td class="l"><a href="/dashboard/#overview">customer view</a></td></tr>
+<tr><td class="l">Dashboard — partner</td><td class="l">driver plan, pickups collected → predicted, value of SMART, the data partnership</td><td class="l"><a href="/dashboard/#operators">partner view</a></td></tr>
+<tr><td class="l">Dashboard — Europress</td><td class="l">live weight model per machine, model checks, sales leads, data exchange</td><td class="l"><a href="/dashboard/#ep-sensor">Europress view</a></td></tr>
+<tr><td class="l">Source code</td><td class="l">dashboard and pipeline (<code>europress-dashboard/</code>), simulator and model (<code>simulator-weather-and-stuff/</code>)</td><td class="l">in the submitted repository</td></tr>
+</tbody></table></div></section>
+
+<section id="problem"><h2><span class="n">1</span>The problem</h2>
+<ul>
+<li><b>Weight decides the bill, but only the operator knows it</b> — at the weighbridge, after the truck has left.</li>
+<li><b>Customers</b> can't see what their next pickup will cost, and trucks often come before the machine is full.</li>
+<li><b>Operators</b> don't know how many drivers they need next week; Mondays carry the whole weekend.</li>
+<li><b>Europress</b> sells the machines, but only about 15 % of customers are on SMART today.</li>
+</ul></section>
+
+<section id="built"><h2><span class="n">2</span>What we built</h2>
+<p><b>A weight model.</b> It reads what a SMART machine already reports — fill level, compaction strokes and hydraulic pressure, plus the local weather — and gives the approximate weight in the container now and at the next pickup. Weight × the customer's price per tonne gives the <b>expected charge before the truck comes</b>. For anything about weight, the <a href="index.html">technical documentation</a> is the reference.</p>
+<p class="tcap"><b>Table 1.</b> Weight error per pickup (simulated fleet, 400 machines).</p>
+<div class="tbl"><table><thead><tr><th class="l">test</th><th>mean error</th><th>within ±5 %</th><th>within ±10 %</th></tr></thead><tbody>
+<tr><td class="l">machines the model never saw</td><td>5.3 %</td><td>55 %</td><td>88 %</td></tr>
+<tr><td class="l">same machines, later months</td><td>3.7 %</td><td>73 %</td><td>–</td></tr>
+<tr><td class="l">today's rule of thumb (fill × typical density)</td><td>32.1 %</td><td>–</td><td>–</td></tr>
+</tbody></table></div>
+<p><b>A dashboard with three views</b> — customer, partner and Europress — built on that model. Rules decide, SMART AI explains in plain words, and every number opens its calculation.</p></section>
+
+<section id="sides"><h2><span class="n">3</span>Three sides, one system</h2>
+<div class="sides">
+<div class="side"><h3>Customer</h3><span class="lbl">Gets</span><p>The approximate weight in every container, the expected charge of the next pickups, and the savings SMART AI found.</p><span class="lbl">Gives</span><p>A share of what SMART saves.</p><span class="lbl">Demo: hotel group</span><p>€52,154 a year found — 37 % of its €140,574 waste cost. 255 of 395 pickups came before the machine was full.</p></div>
+<div class="side"><h3>Waste-operator partner</h3><span class="lbl">Gets</span><p>A driver plan (which days to call in more drivers), pickups predicted 14 days ahead, and the load of each pickup before the truck leaves.</p><span class="lbl">Gives</span><p>Pickups, weighbridge weights and invoice lines for its SMART customers, through SMART.</p><span class="lbl">Demo: Hauler Alpha</span><p>2,748 → 2,072 pickups a year (676 fewer trips); 2,210 → 2,588 kg per pickup.</p></div>
+<div class="side"><h3>Europress</h3><span class="lbl">Gets</span><p>More SMART subscriptions, a recurring fee that grows with customer savings, and sales leads ranked by savings.</p><span class="lbl">Demo: whole fleet</span><p>€1.25M of yearly customer savings; at a 25 % share, about €311k a year in SMART fees.</p></div>
+</div>
+<p class="notice">Operators are partners. The customer sees an approximate weight and what SMART can improve — SMART never tells a customer that the operator's figure is wrong.</p></section>
+
+<section id="money"><h2><span class="n">4</span>How the money is made</h2>
+<p><b>Price: a share of the money SMART predicts it saves, agreed per customer.</b> The fee is always smaller than the saving, so the customer stays. The demo uses 25 %: the hotel group would pay about €13,000 a year and keep about €39,000.</p>
+<p class="tcap"><b>Table 2.</b> Free and SMART.</p>
+<div class="tbl"><table><thead><tr><th class="l"></th><th class="l">Free</th><th class="l">SMART</th></tr></thead><tbody>
+<tr><td class="l">Weight</td><td class="l">none — weight is what SMART sells</td><td class="l">every container, now and at the next pickup</td></tr>
+<tr><td class="l">Money</td><td class="l">cost and pickup count; the total saving SMART would find, locked</td><td class="l">every saving, plus the expected charge of each pickup</td></tr>
+<tr><td class="l">Machines</td><td class="l">list and timetable pickups only — no fill level</td><td class="l">fill level, when each machine is full, history, patterns and forecasts</td></tr>
+<tr><td class="l">Ordering and alerts</td><td class="l">manual: the customer orders each pickup</td><td class="l">automatic: SMART orders the truck when the machine is full and alerts on savings</td></tr>
+<tr><td class="l">Period and AI</td><td class="l">last 1–3 months; 3 AI questions a day</td><td class="l">any period; no limit</td></tr>
+</tbody></table></div>
+<p><b>Where the money comes from:</b></p>
+<ol>
+<li><b>Conversion.</b> Free shows a customer what it is missing — its weight and its next bill — and SMART unlocks it.</li>
+<li><b>Size of the saving.</b> The fee grows with the saving, so sales start with the biggest savers: large customers save a median €60,612 a year (28 % of cost).</li>
+<li><b>Partners.</b> Every operator that shares data sharpens the predictions for all its customers and brings them to SMART. There are only about 20 operator partners in Finland, against many customers.</li>
+<li><b>Retention.</b> A fee that is a share of a real saving is easy to keep paying.</li>
+</ol></section>
+
+<section id="scenarios"><h2><span class="n">5</span>Scenarios</h2>
+<p class="tcap"><b>Table 3.</b> The same customer in three situations.</p>
+<div class="tbl"><table><thead><tr><th class="l"></th><th class="l">No SMART</th><th class="l">SMART Free</th><th class="l">SMART</th></tr></thead><tbody>
+<tr><td class="l">Weight of the waste</td><td class="l">known only from the operator, after pickup</td><td class="l">not shown</td><td class="l">approximate weight, any time</td></tr>
+<tr><td class="l">Next bill</td><td class="l">a surprise</td><td class="l">a surprise</td><td class="l">expected charge before the truck comes</td></tr>
+<tr><td class="l">Pickups</td><td class="l">by calendar — trucks often come half full</td><td class="l">ordered by hand; no fill level shown</td><td class="l">truck ordered when the machine is full</td></tr>
+<tr><td class="l">Cost of SMART</td><td class="l">–</td><td class="l">€0</td><td class="l">a share of the saving</td></tr>
+</tbody></table></div>
+<p>For the partner: without SMART, drivers are planned by habit and Mondays overflow; with SMART, the driver plan shows 14 days ahead which days need extra drivers.</p></section>
+
+<section id="trust"><h2><span class="n">6</span>Trust and control</h2>
+<p>Europress does not sell data to third parties. Data is only <b>exchanged</b>, and only when both parties agree: the customer and its operator share through SMART so that pickups, drivers and bills can be planned. What Europress sells is <b>trust and control</b>.</p></section>
+
+<section id="future"><h2><span class="n">7</span>Next step: train on real weight</h2>
+<p>Today the weight model is trained and tested on a <b>simulated</b> fleet of 400 machines. To prove its accuracy on real compactors, and to train it on real waste, Europress may need to invest in <b>weighing what a small group of compactors actually outputs</b>. Only that reference group needs a scale; every other SMART machine keeps using the model, by software.</p>
+<p class="tcap"><b>Table 4.</b> Ways to get real weights, cheapest first.</p>
+<div class="tbl"><table><thead><tr><th class="l">source of real weight</th><th class="l">what it takes</th><th class="l">cost</th></tr></thead><tbody>
+<tr><td class="l">Weighbridge weights from operator partners</td><td class="l">partners share them through SMART, as part of the data exchange</td><td class="l">no hardware</td></tr>
+<tr><td class="l">Europress's own scale platform or Scaletipper</td><td class="l">fit products Europress already sells under a reference group of machines</td><td class="l">Europress's own product price</td></tr>
+<tr><td class="l">Load cells under a reference group</td><td class="l">4 sealed load cells under the supports of about 10 machines, reporting into SMART</td><td class="l">≈ €3.4–6.3k per machine installed, ≈ €34–63k for ten (estimate)</td></tr>
+</tbody></table></div>
+<ol>
+<li><b>Weigh</b> every pickup from the reference group, across materials and seasons (wet autumn, frozen winter).</li>
+<li><b>Retrain</b> the model on those real weights, and test it on machines outside the reference group.</li>
+<li><b>Roll out</b> the retrained model to every SMART machine as a software update; the rest of the fleet needs no hardware.</li>
+<li><b>Keep the group weighing</b>, so the model is checked and retrained as machines and waste change.</li>
+</ol>
+<p>The investment is made only after the demo has convinced customers and partners, and it is sized to the reference group, not to the fleet.</p></section>
+
+<section id="demo"><h2><span class="n">8</span>See it in the demo</h2>
+<p class="links"><a href="/dashboard/#overview">Customer view</a><a href="/dashboard/#weight">Weight per machine</a><a href="/dashboard/#operators">Partner view</a><a href="/dashboard/#ep-sensor">Europress view</a><a href="index.html">Technical documentation</a></p>
+<p>Use the <b>Free / SMART</b> switch in the dashboard header to see both plans.</p></section>
+
+<section id="assume"><h2><span class="n">9</span>Assumptions</h2>
+<ul>
+<li>All data is synthetic (Europress competition pack and our simulator); all prices are hypothetical. "Data is demo" is shown in the app.</li>
+<li>The 25 % share of savings is a demo value; the real share is agreed per customer.</li>
+<li>Customer machine weights are computed on a simulated machine of the same material, size and fill.</li>
+<li>Driver plan: one driver handles about 6 container pickups a day.</li>
+<li>About 15 % of customers on SMART and about 20 operator partners: as stated by Europress.</li>
+</ul></section>
+</main></div></body></html>

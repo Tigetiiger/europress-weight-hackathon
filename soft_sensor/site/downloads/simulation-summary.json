@@ -1,0 +1,45 @@
+{
+  "seed": 7,
+  "n_bins": 400,
+  "days": 365,
+  "start": "2025-10-01",
+  "hourly_rows": 3504000,
+  "n_lifts": 20281,
+  "lift_mass_by_material": {
+    "cardboard": {
+      "mean": 3044.1,
+      "count": 10146
+    },
+    "mixed_waste": {
+      "mean": 4856.1,
+      "count": 2117
+    },
+    "paper": {
+      "mean": 3389.7,
+      "count": 2955
+    },
+    "plastic_film": {
+      "mean": 1842.8,
+      "count": 5063
+    }
+  },
+  "false_full_lift_share": 0.10172082244465264,
+  "mass_balance_kg": {
+    "mass_start_kg": 689915.3405234581,
+    "mass_end_kg": 671379.8956726756,
+    "material_in_kg": 61942560.792402506,
+    "precip_in_kg": 221712.83919291923,
+    "drained_kg": 38098.90919321419,
+    "seeped_kg": 38008.20622831219,
+    "side_waste_kg": 1594204.2605542038,
+    "lifted_kg": 60512497.70047048,
+    "residual_kg": -1.8468639950697252e-09
+  },
+  "mass_balance_max_abs_residual_kg": 2.3028405848890543e-09,
+  "timings_s": {
+    "precompute_s": 1.92,
+    "loop_s": 21.63,
+    "strokes_s": 11.23
+  },
+  "note": "Synthetic data. Nothing here represents real Europress data."
+}

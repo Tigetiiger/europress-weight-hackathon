@@ -1,0 +1,74 @@
+{
+  "fill_only": {
+    "mean_ape_pct": 23.31401378522173,
+    "median_ape_pct": 15.080678491718569,
+    "p90_ape_pct": 40.18504518935943,
+    "wape_pct": 18.990424270013076,
+    "mae_kg": 566.2439944221594
+  },
+  "+pressure": {
+    "mean_ape_pct": 7.293214765591421,
+    "median_ape_pct": 5.884513790363084,
+    "p90_ape_pct": 14.827310691822234,
+    "wape_pct": 7.277606247869433,
+    "mae_kg": 216.99888180657345
+  },
+  "+pressure+presses": {
+    "mean_ape_pct": 5.2360717481917,
+    "median_ape_pct": 4.157476318505946,
+    "p90_ape_pct": 10.824671141097639,
+    "wape_pct": 5.1857241344497105,
+    "mae_kg": 154.6245152878924
+  },
+  "+rain+rh (7 d)": {
+    "mean_ape_pct": 5.187578878442442,
+    "median_ape_pct": 4.12793980572805,
+    "p90_ape_pct": 10.736222227853453,
+    "wape_pct": 5.127922604600389,
+    "mae_kg": 152.90102724569664
+  },
+  "segments": {
+    "material=cardboard": {
+      "fill_only": 22.440509842834487,
+      "+pressure": 7.483114891590907,
+      "+pressure+presses": 5.460318038716858,
+      "+rain+rh (7 d)": 5.387729245489972
+    },
+    "material=mixed_waste": {
+      "fill_only": 23.277673496118457,
+      "+pressure": 6.904296508137105,
+      "+pressure+presses": 4.565225729779551,
+      "+rain+rh (7 d)": 4.489224446083582
+    },
+    "material=paper": {
+      "fill_only": 23.065672879259253,
+      "+pressure": 7.849640202277589,
+      "+pressure+presses": 5.656712925783451,
+      "+rain+rh (7 d)": 5.6593772272997445
+    },
+    "material=plastic_film": {
+      "fill_only": 25.226361992214464,
+      "+pressure": 6.750329495010791,
+      "+pressure+presses": 4.821683206812354,
+      "+rain+rh (7 d)": 4.8031760014315035
+    },
+    "false-full lifts": {
+      "fill_only": 80.46675839608275,
+      "+pressure": 11.056514110055774,
+      "+pressure+presses": 7.124739615790692,
+      "+rain+rh (7 d)": 7.174211836360993
+    },
+    "cardboard open_hopper": {
+      "fill_only": 24.09416217402866,
+      "+pressure": 7.520499314390871,
+      "+pressure+presses": 5.506538733083061,
+      "+rain+rh (7 d)": 5.321127083880127
+    },
+    "cardboard indoor_shaft": {
+      "fill_only": 21.235211848207552,
+      "+pressure": 7.297087137332171,
+      "+pressure+presses": 5.383771429900729,
+      "+rain+rh (7 d)": 5.44033628680014
+    }
+  }
+}

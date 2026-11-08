@@ -1,0 +1,81 @@
+/* Weight soft-sensor pages (Europress workspace). Uses the tokens from styles.css only — chart hues
+   live in js/sensor/charts.js. */
+@layer views {
+  .ss-view .ss-body { display: flex; flex-direction: column; gap: var(--s-6); }
+  .ss-notice {
+    display: flex; align-items: flex-start; gap: var(--s-3); padding: var(--s-3) var(--s-4); margin-bottom: var(--s-4);
+    border: 1px solid var(--note-bd); border-radius: var(--radius-2); background: var(--note-bg); color: var(--ink-2); font-size: var(--fs-2);
+  }
+  .ss-notice .state { flex: none; }
+  .ss-tabs { display: flex; flex-wrap: wrap; gap: var(--s-1); border-bottom: 1px solid var(--line); margin-bottom: var(--s-6); }
+  .ss-tabs a {
+    display: inline-flex; align-items: center; min-height: var(--tap); padding: 0 var(--s-4); margin-bottom: -1px;
+    color: var(--ink-2); text-decoration: none; font-weight: 600; font-size: var(--fs-2); border-bottom: 2px solid transparent;
+  }
+  .ss-tabs a:hover { color: var(--ink); }
+  .ss-tabs a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--ink); }
+
+  /* replay clock */
+  .ss-clock { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-3) var(--s-6); align-items: center; }
+  .ss-clock-time b { display: block; font: 600 var(--fs-4)/1.2 var(--font-mono); font-variant-numeric: tabular-nums; }
+  .ss-clock-ctl { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; justify-content: flex-end; }
+  .ss-clock-ctl .btn { min-width: 96px; }
+  .ss-range { grid-column: 1 / -1; width: 100%; accent-color: var(--ink); min-height: 24px; }
+
+  .ss-filters { display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: center; margin-bottom: var(--s-4); }
+  .seg.ss-wrap { flex-wrap: wrap; }
+  .seg.ss-wrap button { padding: 0 var(--s-3); }
+  .ss-field input, .ss-field select {
+    min-height: var(--tap); padding: 0 var(--s-3); border: 1px solid var(--line-strong); border-radius: var(--radius-1);
+    background: var(--surface); font-size: var(--fs-2);
+  }
+  .ss-field input { width: 170px; }
+  .ss-more { margin-top: var(--s-4); }
+  .table .muted-cell { color: var(--ink-3); }
+
+  /* machine */
+  .ss-mhead { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-2); }
+  .ss-mtitle { display: flex; align-items: center; gap: var(--s-2); font: 400 var(--fs-5)/1 var(--font-serif); letter-spacing: -.03em; }
+  .ss-chart-tall { height: 340px; }
+  .ss-big { display: flex; align-items: baseline; gap: var(--s-2); }
+  .ss-big b { font-size: 56px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .ss-big small { font-size: var(--fs-4); color: var(--ink-2); font-weight: 600; }
+  .ss-band { margin: var(--s-2) 0 var(--s-4); font-size: var(--fs-2); color: var(--ink-2); }
+  .ss-checks { list-style: none; margin: 0 0 var(--s-3); padding: 0; display: flex; flex-direction: column; gap: var(--s-2); font-size: var(--fs-2); color: var(--ink-2); }
+  .ss-checks li { display: flex; gap: var(--s-2); align-items: baseline; }
+  .ss-checks .state { flex: none; min-width: 64px; justify-content: center; }
+  .ss-inputs { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-1) var(--s-4); margin: var(--s-2) 0 0; font-size: var(--fs-2); }
+  .ss-inputs div { display: contents; }
+  .ss-inputs dt { color: var(--ink-3); }
+  .ss-inputs dd { margin: 0; text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+  .ss-compare th .desc { display: block; text-transform: none; letter-spacing: 0; font-weight: 400; white-space: normal; max-width: 30ch; margin-left: auto; }
+  .ss-stats { margin-top: var(--s-4); }
+  .note[data-state="warn"] { border-color: var(--warn-bd); background: var(--warn-bg); color: var(--warn-c); margin-top: var(--s-4); }
+  .note[data-state="bad"] { border-color: var(--bad-bd); background: var(--bad-bg); color: var(--bad-c); }
+
+  /* how it works */
+  .ss-flow { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--s-4); }
+  .ss-flow li { position: relative; padding: var(--s-4); border: 1px solid var(--line); border-radius: var(--radius-2); background: var(--ground); }
+  .ss-flow li:not(:last-child)::after { content: "→"; position: absolute; right: -14px; top: 50%; transform: translateY(-50%); color: var(--ink-3); font-weight: 700; z-index: 1; }
+  .ss-flow b { display: block; margin: var(--s-2) 0 var(--s-1); }
+  .ss-flow p { font-size: var(--fs-2); color: var(--ink-2); }
+  .ss-flow-n { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: var(--on-action); font-size: var(--fs-1); font-weight: 700; }
+  .ss-caveats { margin: 0; padding-left: var(--s-6); display: flex; flex-direction: column; gap: var(--s-2); color: var(--ink-2); font-size: var(--fs-2); max-width: 90ch; }
+  .ss-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--s-4); }
+  .ss-gallery figure { margin: 0; border: 1px solid var(--line); border-radius: var(--radius-2); overflow: hidden; background: var(--surface); }
+  .ss-gallery img { display: block; width: 100%; height: 200px; object-fit: contain; background: var(--surface); }
+  .ss-gallery figcaption { padding: var(--s-2) var(--s-3); font-size: var(--fs-2); color: var(--ink-2); border-top: 1px solid var(--line); }
+
+  @media (max-width: 1100px) {
+    .ss-flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ss-flow li::after { display: none; }
+  }
+  @media (max-width: 720px) {
+    .ss-clock { grid-template-columns: minmax(0, 1fr); }
+    .ss-clock-ctl { justify-content: flex-start; }
+    .ss-flow { grid-template-columns: minmax(0, 1fr); }
+    .ss-big b { font-size: 44px; }
+    .ss-field input { width: 100%; }
+  }
+}

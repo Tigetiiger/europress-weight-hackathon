@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Europress SMART Insights</title>
+  <meta name="description" content="Europress SMART customer dashboard — your waste costs, savings and where every number comes from.">
+  <link rel="icon" href="/img/smart-favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Radio+Canada+Big:wght@400;500;600&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/sensor.css">
+  <link rel="stylesheet" href="/css/realtime.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="/" title="SMART Weight home"><img src="/img/europress-smart-logo.svg" alt="Europress SMART" width="96" height="62"></a>
+    <nav class="nav" aria-label="Main" data-ws-nav="customer">
+      <a class="navitem" href="#overview"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg><span data-i18n="nav.overview"></span></a>
+      <a class="navitem" href="#weight"><svg viewBox="0 0 24 24"><path d="M5.5 9h13l-1.8 11H7.3z"/><circle cx="12" cy="5.5" r="2"/></svg><span data-i18n="nav.weight"></span></a>
+      <a class="navitem" href="#savings"><svg viewBox="0 0 24 24"><path d="M4 16l5-5 4 4 7-7"/><path d="M15 8h5v5"/></svg><span data-i18n="nav.savings"></span></a>
+      <a class="navitem" href="#machines"><svg viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="12" rx="2"/><path d="M8 7V5h8v2M8 12h8M8 15.5h5"/></svg><span data-i18n="nav.machines"></span></a>
+      <a class="navitem" href="#contracts"><svg viewBox="0 0 24 24"><path d="M7 3.5h7.5l4 4V20.5H7z"/><path d="M14.5 3.5v4h4M10 12h6M10 16h6"/></svg><span data-i18n="nav.operators"></span></a>
+      <a class="navitem" href="#trends"><svg viewBox="0 0 24 24"><path d="M4 19h16"/><path d="M5 15l4-4 3 3 6-7"/><path d="M15 7h3v3"/></svg><span data-i18n="nav.trends"></span></a>
+      <a class="navitem" href="#faq"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 014.9.6c0 1.6-2.5 2-2.5 3.4M12 16.8h.01"/></svg><span data-i18n="nav.faq"></span></a>
+    </nav>
+    <nav class="nav hidden" aria-label="Europress" data-ws-nav="europress">
+      <a class="navitem" href="#ep-sensor"><svg viewBox="0 0 24 24"><path d="M5.5 9h13l-1.8 11H7.3z"/><circle cx="12" cy="5.5" r="2"/><path d="M9.5 15.5l2-2 1.5 1.5 2-2.5"/></svg><span data-i18n="nav.ep.sensor"></span></a>
+      <a class="navitem" href="#ep-overview"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg><span data-i18n="nav.ep.overview"></span></a>
+      <a class="navitem" href="#ep-pipeline"><svg viewBox="0 0 24 24"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg><span data-i18n="nav.ep.pipeline"></span></a>
+      <a class="navitem" href="#ep-fleet"><svg viewBox="0 0 24 24"><path d="M14.5 6.5a4 4 0 00-5.3 5.3L4 17l3 3 5.2-5.2a4 4 0 005.3-5.3l-2.4 2.4-2.6-.6-.6-2.6z"/></svg><span data-i18n="nav.ep.fleet"></span></a>
+      <a class="navitem" href="#ep-data"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M4 15h16M10 4v16M15 4v16"/></svg><span data-i18n="nav.ep.data"></span></a>
+    </nav>
+    <nav class="nav hidden" aria-label="Partners" data-ws-nav="partners">
+      <a class="navitem" href="#operators"><svg viewBox="0 0 24 24"><path d="M3 16V8h11v8M14 11h4l3 3v2h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg><span data-i18n="nav.forOperators"></span></a>
+      <a class="navitem" href="#faq"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 014.9.6c0 1.6-2.5 2-2.5 3.4M12 16.8h.01"/></svg><span data-i18n="nav.faq"></span></a>
+    </nav>
+    <p class="sidebar-foot" data-i18n="top.synthetic"></p>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div class="page-title"><p class="eyebrow" id="pageEyebrow"></p><h1 id="pageTitle"></h1></div>
+      <div class="top-actions">
+        <div class="view-switch" id="viewSwitch">
+          <button class="vs-btn" id="wsBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="wsMenu"><span id="wsLabel"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
+          <div class="ws vs-menu hidden" id="wsMenu" role="menu" aria-label="Workspace">
+          <button type="button" role="menuitemradio" data-ws="customer" data-i18n="ws.customer"></button>
+          <button type="button" role="menuitemradio" data-ws="europress" data-i18n="ws.europress"></button>
+          <button type="button" role="menuitemradio" data-ws="partners" data-i18n="ws.partners"></button>
+          </div>
+        </div>
+        <div class="account" id="customerPick">
+          <button class="account-btn" id="accountBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="accountMenu">
+            <span class="avatar" id="accountAvatar" aria-hidden="true"></span>
+            <span class="account-name"><b id="accountName"></b><small id="accountMeta"></small></span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>
+          </button>
+          <div class="account-menu hidden" id="accountMenu" role="menu">
+            <label class="menu-label" for="customerSelect" data-i18n="account.switch"></label>
+            <select id="customerSelect"></select>
+            <a class="btn ghost" href="#account" role="menuitem" data-i18n="account.details"></a>
+          </div>
+        </div>
+        <div class="bell-wrap" id="bellWrap">
+          <button class="bell" id="bellBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="bellPanel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16.5V11a6 6 0 0112 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 004 0"/></svg><span class="bell-n" aria-hidden="true"></span></button>
+          <div class="bell-panel hidden" id="bellPanel" role="dialog" aria-label="Notifications"></div>
+        </div>
+        <label class="field hidden" id="operatorPick"><span class="sr" data-i18n="op.select"></span><select id="operatorSelect"></select></label>
+        <div class="seg plan-seg" role="group" id="planToggle"></div>
+        <div class="seg" role="group" aria-label="Language"><button type="button" data-lang="fi">FI</button><button type="button" data-lang="en">EN</button></div>
+      </div>
+    </header>
+
+    <!-- Overview: 1 weight now → 2 machines live → 3 money (how to save) → the rest (year in numbers, answers, changes) -->
+    <section class="view" id="view-overview" data-view>
+      <article class="card weight-hero" id="weightHero" aria-live="polite"></article>
+      <article class="card">
+        <header class="card-head"><div class="card-title"><h2 data-i18n="machines.title"></h2><button class="info" type="button" data-info="m.forecastNote" aria-label="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></div><a class="link" href="#machines" data-i18n="link.allMachines"></a></header>
+        <div class="machines-grid" id="machinesNowOverview"></div>
+      </article>
+      <article class="card save-card">
+        <header class="card-head"><div class="card-title"><h2 id="saveTitle"></h2><button class="info" type="button" data-info="save.sub" aria-label="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></div></header>
+        <ul class="save-list" id="howSave"></ul>
+        <p class="fine save-price" data-i18n="save.price"></p>
+        <a class="btn" href="#savings" data-i18n="save.cta"></a>
+      </article>
+      <section class="ov-year" id="ovYear" aria-labelledby="ovYearTitle">
+        <header class="ov-head"><h2 id="ovYearTitle" data-i18n="ov.year"></h2><div data-period></div></header>
+        <div class="kpis" id="kpis"></div>
+        <dl class="stat-line" id="kpiStats"></dl>
+      </section>
+      <article class="card">
+        <header class="card-head"><div class="card-title"><h2 data-i18n="chg.title"></h2></div><div class="head-actions"><span class="eyebrow" id="probPeriod"></span><div class="seg" role="group" aria-label="Period" id="chgToggle"></div></div></header>
+        <ul class="chg-list" id="problems"></ul>
+      </article>
+    </section>
+
+    <!-- Savings -->
+    <section class="view hidden" id="view-savings" data-view>
+      <div class="grid g-2-1">
+        <article class="card">
+          <header class="card-head"><div class="card-title"><h2 data-i18n="card.levers"></h2><button class="info" type="button" data-info="card.levers.sub" aria-label="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></div></header>
+          <div class="table-wrap"><table class="table" id="leversTable"></table></div>
+        </article>
+        <article class="card gauge-card">
+          <header class="card-head"><div><h2 data-i18n="card.gauge"></h2><p class="muted" id="gaugeSub"></p></div></header>
+          <div class="gauge" id="gauge" role="button" tabindex="0"></div>
+          <dl class="stats" id="gaugeStats"></dl>
+        </article>
+      </div>
+      <article class="card"><header class="card-head"><h2 data-i18n="card.cost"></h2></header><div class="chart"><canvas id="costChart"></canvas></div></article>
+      <article class="card peers"><header class="card-head"><h2 data-i18n="card.peers"></h2></header><div class="peer-num" id="peersText"></div><a class="btn" href="https://epsmart.fi/en/" target="_blank" rel="noopener" data-i18n="cta.contact"></a></article>
+    </section>
+
+    <!-- Machines -->
+    <section class="view hidden" id="view-machines" data-view>
+      <article class="card">
+        <header class="card-head"><div class="card-title"><h2 data-i18n="machines.title"></h2><button class="info" type="button" data-info="m.forecastNote" aria-label="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></div><div class="head-actions"><div class="seg mv" role="group" aria-label="View" data-mv="machines"><button type="button" data-mode="design" data-i18n="mv.design"></button><button type="button" data-mode="mixed" data-i18n="mv.mixed"></button><button type="button" data-mode="table" data-i18n="mv.table"></button></div><span class="eyebrow" id="machinesAsOf"></span></div></header>
+        <div class="machines-grid" id="machinesNow"></div>
+      </article>
+      <article class="card">
+        <header class="card-head"><div class="card-title"><h2 data-i18n="card.machines"></h2><button class="info" type="button" data-info="card.machines.sub" aria-label="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></div></header>
+        <div class="table-wrap"><table class="table" id="devicesTable"></table></div>
+      </article>
+    </section>
+
+    <!-- One machine: weight from the soft sensor (js/sensor/customer.js) -->
+    <section class="view hidden" id="view-machine" data-view><div id="machineWeight" class="cw-view"></div></section>
+
+    <!-- Operators & contracts -->
+    <section class="view hidden" id="view-contracts" data-view>
+      <article class="card">
+        <header class="card-head"><div class="card-title"><h2 data-i18n="card.operators"></h2><button class="info" type="button" data-info="card.operators.sub" aria-label="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></div><span class="eyebrow" id="operatorsAsOf"></span></header>
+        <div class="table-wrap"><table class="table" id="operatorsTable"></table></div>
+      </article>
+      <button class="info-pill" type="button" data-info="contracts.note"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span data-i18n="info.how"></span></button>
+    </section>
+
+    <!-- Weight & seasons -->
+    <section class="view hidden" id="view-weight" data-view>
+      <article class="card weight-table" id="weightTable"></article>
+    </section>
+
+    <!-- Trends -->
+    <section class="view hidden" id="view-trends" data-view>
+      <div class="tr-top" data-period></div>
+      <article class="card">
+        <header class="card-head"><div class="card-title"><h2 data-i18n="tr.title"></h2><button class="info" type="button" data-info="tr.info" aria-label="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></div><span class="eyebrow" data-i18n="tr.compare"></span></header>
+        <ul class="tf-grid" id="trendFindings"></ul>
+      </article>
+      <div class="grid g-1-1">
+        <article class="card"><header class="card-head"><h2 data-i18n="tr.mixedTitle"></h2></header><div class="chart chart-sm"><canvas id="mixedTrendChart"></canvas></div></article>
+        <article class="card"><header class="card-head"><h2 data-i18n="tr.streams"></h2></header><div class="chart chart-sm"><canvas id="streamTrendChart"></canvas></div></article>
+      </div>
+      <div class="grid g-1-1">
+        <article class="card"><header class="card-head"><h2 data-i18n="tr.costPickups"></h2></header><div class="chart chart-sm"><canvas id="costPickupChart"></canvas></div></article>
+        <article class="card"><header class="card-head"><h2 data-i18n="tr.fillTitle"></h2></header><div class="chart chart-sm"><canvas id="fillTrendChart"></canvas></div></article>
+      </div>
+      <details class="card tr-when">
+        <summary class="card-head"><div class="card-title"><h2 data-i18n="tr.whenTitle"></h2><button class="info" type="button" data-info="tr.whenInfo" aria-label="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></div></summary>
+        <div class="heat-wrap"><div class="heat" id="heatmap" role="img"></div><p class="fine" data-i18n="tr.heatLegend"></p></div>
+        <div class="grid g-1-1 when-grid">
+          <div><h3 class="sub-h" data-i18n="tr.byWeekday"></h3><div class="chart chart-sm"><canvas id="weekdayChart"></canvas></div></div>
+          <div><h3 class="sub-h" data-i18n="tr.byHour"></h3><div class="chart chart-sm"><canvas id="hourChart"></canvas></div></div>
+        </div>
+        <h3 class="sub-h" data-i18n="tr.bySeason"></h3>
+        <div class="chart chart-sm"><canvas id="seasonChart"></canvas></div>
+        <p class="season-note" id="seasonNote"></p>
+      </details>
+    </section>
+
+    <!-- SMART Advisor -->
+
+    <!-- Account -->
+    <section class="view hidden" id="view-account" data-view>
+      <div class="grid g-1-2">
+        <article class="card"><header class="card-head"><h2 data-i18n="account.profile"></h2></header><dl class="facts" id="accountFacts"></dl></article>
+        <article class="card"><header class="card-head"><h2 data-i18n="account.sites"></h2></header><div class="table-wrap"><table class="table" id="sitesTable"></table></div></article>
+      </div>
+      <article class="card">
+        <header class="card-head"><div class="card-title"><h2 data-i18n="account.contracts"></h2><button class="info" type="button" data-info="account.contracts.sub" aria-label="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></div><span class="eyebrow" id="contractsAsOf"></span></header>
+        <div class="table-wrap"><table class="table" id="contractsTable"></table></div>
+      </article>
+    </section>
+
+    <!-- Europress: fleet overview -->
+    <section class="view hidden" id="view-ep-overview" data-view>
+      <div class="kpis" id="epKpis"></div>
+      <div class="grid g-2-1">
+        <article class="card"><header class="card-head"><div class="card-title"><h2 data-i18n="ep.flow"></h2><button class="info" type="button" data-info="ep.flow.sub" aria-label="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></div></header><div class="chart"><canvas id="epFlowChart"></canvas></div></article>
+        <article class="card"><header class="card-head"><h2 data-i18n="ep.topPipeline"></h2><a class="link" href="#ep-pipeline" data-i18n="link.allPipeline"></a></header><ul class="mini-levers" id="epTop"></ul></article>
+      </div>
+    </section>
+
+    <!-- Europress: sales pipeline -->
+    <section class="view hidden" id="view-ep-pipeline" data-view>
+      <article class="card">
+        <header class="card-head"><div class="card-title"><h2 data-i18n="sa.title"></h2></div><span class="eyebrow" data-i18n="sa.sub"></span></header>
+        <ul class="answers" id="salesAlerts"></ul>
+      </article>
+      <button class="info-pill" type="button" data-info="ep.pipeline.lead"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span data-i18n="info.how"></span></button>
+      <article class="card"><div class="table-wrap"><table class="table" id="epPipelineTable"></table></div></article>
+    </section>
+
+    <!-- Europress: fleet health -->
+    <section class="view hidden" id="view-ep-fleet" data-view>
+      <div class="kpis" id="epFleetKpis"></div>
+      <div class="grid g-1-1">
+        <article class="card"><header class="card-head"><h2 data-i18n="ep.wo"></h2></header><div class="chart chart-sm clickable" id="epWoWrap" role="button" tabindex="0"><canvas id="epWoChart"></canvas></div></article>
+        <article class="card"><header class="card-head"><div class="card-title"><h2 data-i18n="ep.overflow"></h2><button class="info" type="button" data-info="ep.overflow.sub" aria-label="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></div></header><div class="table-wrap"><table class="table" id="epOverflowTable"></table></div></article>
+      </div>
+      <article class="card"><header class="card-head"><h2 data-i18n="ep.downtime"></h2></header><div class="table-wrap"><table class="table" id="epDowntimeTable"></table></div></article>
+    </section>
+
+    <!-- Europress: data products -->
+    <section class="view hidden" id="view-ep-data" data-view>
+      <button class="info-pill" type="button" data-info="ep.data.lead"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span data-i18n="info.how"></span></button>
+      <div class="grid g-1-1">
+        <article class="card"><header class="card-head"><div><h2 data-i18n="ep.buyers"></h2></div></header><div class="table-wrap"><table class="table" id="epBuyersTable"></table></div></article>
+        <article class="card"><header class="card-head"><div class="card-title"><h2 data-i18n="ep.quality"></h2><button class="info" type="button" data-info="ep.quality.sub" aria-label="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></div></header><div class="chart chart-sm clickable" id="epQualityWrap" role="button" tabindex="0"><canvas id="epQualityChart"></canvas></div></article>
+      </div>
+      <article class="card"><header class="card-head"><div class="card-title"><h2 data-i18n="ep.index"></h2><button class="info" type="button" data-info="ep.index.sub" aria-label="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></div><button class="btn ghost" type="button" id="epFlowTrace" data-i18n="ep.index.how"></button></header><div class="table-wrap"><table class="table" id="epFlowTable"></table></div></article>
+      <article class="card"><header class="card-head"><div class="card-title"><h2 data-i18n="ep.price"></h2><button class="info" type="button" data-info="ep.price.sub" aria-label="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></div></header><div class="chart chart-sm"><canvas id="epPriceChart"></canvas></div></article>
+    </section>
+
+    <!-- Europress: hydraulic weight soft sensor (js/sensor/, data from the softsensor service + pipeline/softsensor_data.py) -->
+    <section class="view hidden ss-view" id="view-ep-sensor" data-view><div data-ss-top></div><div class="ss-body" data-ss-body></div></section>
+    <section class="view hidden ss-view" id="view-ep-sensor-check" data-view><div data-ss-top></div><div class="ss-body" data-ss-body></div></section>
+    <section class="view hidden ss-view" id="view-ep-sensor-model" data-view><div data-ss-top></div><div class="ss-body" data-ss-body></div></section>
+    <section class="view hidden ss-view" id="view-ep-sensor-how" data-view><div data-ss-top></div><div class="ss-body" data-ss-body></div></section>
+
+    <!-- For waste operators -->
+    <section class="view hidden" id="view-operators" data-view>
+      <button class="info-pill" type="button" data-info="op.sub"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span data-i18n="info.how"></span></button>
+      <div class="kpis" id="opKpis"></div>
+      <div class="grid g-2-1">
+        <article class="card" id="opDrivers"></article>
+        <article class="card"><header class="card-head"><h2 data-i18n="op.streams"></h2></header><div class="chart chart-sm"><canvas id="opStreamChart"></canvas></div></article>
+      </div>
+      <article class="card">
+        <header class="card-head"><div><h2 data-i18n="opx.graph"></h2><p class="muted" data-i18n="opx.graphSub"></p></div><span class="ai-badge" data-i18n="opx.by"></span></header>
+        <div class="chart ss-chart-tall"><canvas id="opHistoryChart"></canvas></div>
+      </article>
+      <article class="card op-value" id="opValue"></article>
+      <div class="grid g-1-1">
+        <article class="card"><header class="card-head"><h2 data-i18n="op.hist"></h2></header><div class="chart"><canvas id="opHistChart"></canvas></div></article>
+        <article class="card"><header class="card-head"><h2 data-i18n="op.renewals"></h2></header><div class="table-wrap"><table class="table" id="renewalsTable"></table></div></article>
+      </div>
+      <div class="grid g-1-1">
+        <article class="card"><header class="card-head"><div class="card-title"><h2 data-i18n="op.inbound"></h2><button class="info" type="button" data-info="op.inbound.sub" aria-label="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></div></header><div class="chart chart-sm"><canvas id="opRegionChart"></canvas></div></article>
+        <article class="card"><header class="card-head"><div class="card-title"><h2 data-i18n="op.quality"></h2><button class="info" type="button" data-info="op.quality.sub" aria-label="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></div></header><div class="table-wrap"><table class="table" id="opHotspots"></table></div></article>
+      </div>
+      <button class="info-pill" type="button" data-info="op.value"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span data-i18n="info.how"></span></button>
+    </section>
+
+    <!-- FAQ -->
+    <section class="view hidden" id="view-faq" data-view>
+      <div class="grid g-1-1">
+        <article class="card"><header class="card-head"><h2 data-i18n="faq.title"></h2></header><div id="faqList" class="faq"></div></article>
+        <article class="card"><header class="card-head"><h2 data-i18n="faq.method"></h2></header><div id="methodList" class="faq"></div></article>
+      </div>
+    </section>
+
+    <footer class="footer"><p data-i18n="footer.note"></p></footer>
+  </main>
+</div>
+
+<aside class="ai-popup hidden" id="aiPopup" role="status" aria-live="polite"></aside>
+<div class="scrim hidden" id="scrim"></div>
+<aside class="drawer hidden" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+  <header class="drawer-head">
+    <div><p class="eyebrow" id="drawerEyebrow" data-i18n="drawer.title"></p><h2 id="drawerTitle"></h2></div>
+    <button class="icon-btn" type="button" data-close data-i18n-aria="drawer.close" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </header>
+  <div class="drawer-body" id="drawerBody"></div>
+  <footer class="drawer-foot"><button class="btn" type="button" id="drawerAsk" data-i18n="ai.cta"></button></footer>
+</aside>
+
+
+<button type="button" class="advisor-fab" id="advisorFab" aria-controls="advisorDock" aria-expanded="false" data-i18n-aria="ai.fab"><span class="fab-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M10 3L12.2 8.8L18 11L12.2 13.2L10 19L7.8 13.2L2 11L7.8 8.8L10 3Z" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"></path>
+<path d="M18.5 2.5L19.3 4.7L21.5 5.5L19.3 6.3L18.5 8.5L17.7 6.3L15.5 5.5L17.7 4.7L18.5 2.5Z" fill="currentColor" stroke="currentColor" stroke-width="0.8" stroke-linejoin="round"></path>
+<path d="M17.5 15L18.2 16.8L20 17.5L18.2 18.2L17.5 20L16.8 18.2L15 17.5L16.8 16.8L17.5 15Z" fill="currentColor" stroke="currentColor" stroke-width="0.6" stroke-linejoin="round"></path>
+</svg></span></button>
+<aside class="advisor-dock hidden" id="advisorDock" aria-labelledby="aiDockTitle">
+  <header class="dock-head">
+    <div><h2 id="aiDockTitle" data-i18n="ai.title"></h2><p class="fine" id="aiContext"></p></div>
+    <button class="icon-btn" type="button" id="advisorClose" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </header>
+  <div class="ai-log" id="aiLog" aria-live="polite"></div>
+  <div class="ai-suggest" id="aiSuggest"></div>
+  <form class="ai-form" id="aiForm">
+    <textarea id="aiInput" rows="2" maxlength="600" data-i18n-ph="ai.placeholder" required></textarea>
+    <button class="btn" type="submit" data-i18n="ai.send"></button>
+  </form>
+  <p class="fine" data-i18n="ai.disclaimer"></p>
+</aside>
+<script src="/vendor/chart.umd.js"></script>
+<script type="module" src="/js/app.js"></script>
+</body>
+</html>

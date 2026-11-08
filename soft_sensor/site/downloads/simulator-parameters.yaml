@@ -1,0 +1,752 @@
+run:
+  seed: 7
+  n_bins: 400
+  days: 365
+  start: '2025-10-01'
+  timezone: Europe/Helsinki
+  burn_in_days: 28
+  write_strokes: true
+fleet:
+  material_shares:
+    cardboard: 0.5
+    paper: 0.15
+    plastic_film: 0.25
+    mixed_waste: 0.1
+  containers:
+    cardboard:
+    - - COMBI
+      - 10
+      - 0.1
+    - - COMBI
+      - 14
+      - 0.24
+    - - COMBI
+      - 17
+      - 0.24
+    - - COMBI
+      - 20
+      - 0.13
+    - - COMBI
+      - 22
+      - 0.04
+    - - DUO
+      - 20
+      - 0.12
+    - - DUO
+      - 24
+      - 0.07
+    - - DUO
+      - 27
+      - 0.03
+    - - DUO
+      - 30
+      - 0.02
+    - - DUO
+      - 35
+      - 0.01
+    paper:
+    - - COMBI
+      - 10
+      - 0.65
+    - - COMBI
+      - 14
+      - 0.35
+    plastic_film:
+    - - COMBI
+      - 10
+      - 0.2
+    - - COMBI
+      - 14
+      - 0.35
+    - - COMBI
+      - 17
+      - 0.2
+    - - COMBI
+      - 20
+      - 0.1
+    - - DUO
+      - 20
+      - 0.15
+    mixed_waste:
+    - - COMBI
+      - 10
+      - 0.3
+    - - COMBI
+      - 14
+      - 0.4
+    - - DUO
+      - 20
+      - 0.3
+  press_model_shares:
+    COMBI:
+      Combi: 0.5
+      CombiMax35: 0.3
+      CombiMax40: 0.2
+    DUO:
+      Duo: 0.5
+      DuoMax35: 0.3
+      DuoMax40: 0.2
+  press_models:
+    Combi:
+      force_t: 25
+      cycle_s: 42
+      motor_kw: 4.0
+      aperture_m:
+      - 1.5
+      - 0.9
+    CombiMax35:
+      force_t: 35
+      cycle_s: 66
+      motor_kw: 5.5
+      aperture_m:
+      - 1.85
+      - 1.3
+    CombiMax40:
+      force_t: 40
+      cycle_s: 35
+      motor_kw: 7.5
+      aperture_m:
+      - 1.85
+      - 1.3
+    Duo:
+      force_t: 25
+      cycle_s: 42
+      motor_kw: 4.0
+      aperture_m:
+      - 1.5
+      - 0.9
+    DuoMax35:
+      force_t: 35
+      cycle_s: 66
+      motor_kw: 5.5
+      aperture_m:
+      - 1.85
+      - 1.3
+    DuoMax40:
+      force_t: 40
+      cycle_s: 35
+      motor_kw: 7.5
+      aperture_m:
+      - 1.85
+      - 1.3
+  tare_kg:
+    COMBI:
+    - 4000
+    - 6500
+    DUO:
+    - 2300
+    - 3000
+  infeed_shares:
+    open_hopper: 0.45
+    lidded_hopper: 0.25
+    indoor_shaft: 0.3
+  drainage_share: 0.3
+  waterproof_share_of_undrained: 0.25
+  indoor_installation_share_of_shaft: 0.4
+  floating_roof:
+    material: cardboard
+    min_volume_m3: 24
+    share: 0.5
+    density_gain: 0.1
+  region_shares:
+    UUS: 0.35
+    VAR: 0.18
+    PIR: 0.2
+    POP: 0.15
+    LAP: 0.12
+  sector_by_material:
+    cardboard:
+      retail: 0.45
+      warehouse: 0.3
+      industry: 0.15
+      hotel: 0.1
+    paper:
+      retail: 0.2
+      warehouse: 0.2
+      industry: 0.4
+      hotel: 0.2
+    plastic_film:
+      retail: 0.3
+      warehouse: 0.45
+      industry: 0.25
+      hotel: 0.0
+    mixed_waste:
+      retail: 0.35
+      warehouse: 0.1
+      industry: 0.2
+      hotel: 0.35
+  threshold_pct_shares:
+    80: 0.3
+    85: 0.4
+    90: 0.3
+  target_cycle_days:
+    median: 8.0
+    sigma_log: 0.35
+    min: 3.0
+    max: 10.0
+  storage_outdoor_beta:
+    open_hopper:
+    - 3.0
+    - 2.0
+    lidded_hopper:
+    - 2.5
+    - 2.5
+    indoor_shaft:
+    - 1.0
+    - 6.0
+  opening_shift_h:
+  - -1
+  - 0
+  - 1
+  ref_scale_share: 0.05
+calendar:
+  holidays:
+    fixed:
+    - 01-01
+    - 01-06
+    - 05-01
+    - 12-06
+    - 12-24
+    - 12-25
+    - 12-26
+    easter_offsets:
+    - -2
+    - 0
+    - 1
+    - 39
+    midsummer: true
+    all_saints: true
+sectors:
+  retail:
+    open:
+      weekday:
+      - 7
+      - 21
+      saturday:
+      - 8
+      - 20
+      sunday:
+      - 12
+      - 18
+    closed_on_holidays: true
+    day_factor:
+    - 1.05
+    - 0.95
+    - 0.95
+    - 1.0
+    - 1.1
+    - 1.1
+    - 0.6
+    month_factor:
+    - 0.9
+    - 0.9
+    - 0.95
+    - 1.0
+    - 1.0
+    - 1.0
+    - 0.95
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.1
+    - 1.35
+    hour_weights:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0.5
+    - 1.6
+    - 1.8
+    - 1.6
+    - 1.3
+    - 1.1
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+    - 0.9
+    - 0.9
+    - 0.8
+    - 0.7
+    - 0.6
+    - 0.3
+    - 0
+    - 0
+  warehouse:
+    open:
+      weekday:
+      - 6
+      - 22
+      saturday:
+      - 7
+      - 15
+      sunday: null
+    closed_on_holidays: true
+    day_factor:
+    - 1.05
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.05
+    - 0.4
+    - 0.0
+    month_factor:
+    - 0.95
+    - 0.95
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+    - 0.85
+    - 0.95
+    - 1.0
+    - 1.05
+    - 1.1
+    - 1.15
+    hour_weights:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 1.0
+    - 1.3
+    - 1.4
+    - 1.3
+    - 1.2
+    - 1.0
+    - 0.9
+    - 1.1
+    - 1.2
+    - 1.1
+    - 1.0
+    - 0.9
+    - 0.8
+    - 0.7
+    - 0.6
+    - 0.5
+    - 0
+    - 0
+  industry:
+    open:
+      weekday:
+      - 6
+      - 22
+      saturday: null
+      sunday: null
+    closed_on_holidays: true
+    day_factor:
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+    - 0.95
+    - 0.0
+    - 0.0
+    month_factor:
+    - 1.05
+    - 1.05
+    - 1.05
+    - 1.05
+    - 1.05
+    - 0.95
+    - 0.35
+    - 0.9
+    - 1.05
+    - 1.05
+    - 1.05
+    - 0.85
+    hour_weights:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 1.0
+    - 1.2
+    - 1.2
+    - 1.2
+    - 1.1
+    - 1.0
+    - 0.9
+    - 1.0
+    - 1.1
+    - 1.1
+    - 1.0
+    - 0.9
+    - 0.9
+    - 0.8
+    - 0.8
+    - 0.7
+    - 0
+    - 0
+  hotel:
+    open:
+      weekday:
+      - 6
+      - 23
+      saturday:
+      - 6
+      - 23
+      sunday:
+      - 6
+      - 23
+    closed_on_holidays: false
+    day_factor:
+    - 0.9
+    - 0.9
+    - 0.95
+    - 1.0
+    - 1.15
+    - 1.2
+    - 1.0
+    month_factor:
+    - 0.85
+    - 0.85
+    - 0.9
+    - 0.95
+    - 1.0
+    - 1.3
+    - 1.45
+    - 1.25
+    - 1.0
+    - 0.9
+    - 0.85
+    - 0.95
+    hour_weights:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0.6
+    - 0.9
+    - 1.2
+    - 1.4
+    - 1.4
+    - 1.2
+    - 1.0
+    - 0.9
+    - 1.0
+    - 1.2
+    - 1.3
+    - 1.2
+    - 1.0
+    - 0.9
+    - 0.8
+    - 0.7
+    - 0.5
+    - 0
+weather:
+  mode: synthetic
+  fmi_csv:
+    path: null
+    columns:
+      region: region
+      date: date
+      temp_mean_c: temp_mean_c
+      precip_mm: precip_mm
+      rh_pct: rh_pct
+  regions:
+    UUS:
+      name: Uusimaa
+      jan_c: -3.5
+      jul_c: 17.5
+      precip_mm_year: 660
+      wet_day_prob: 0.48
+      rh_mean: 79
+      rh_amp: 10
+    VAR:
+      name: Varsinais-Suomi
+      jan_c: -4.0
+      jul_c: 17.5
+      precip_mm_year: 670
+      wet_day_prob: 0.48
+      rh_mean: 79
+      rh_amp: 10
+    PIR:
+      name: Pirkanmaa
+      jan_c: -6.5
+      jul_c: 17.0
+      precip_mm_year: 620
+      wet_day_prob: 0.48
+      rh_mean: 80
+      rh_amp: 10
+    POP:
+      name: Pohjois-Pohjanmaa
+      jan_c: -9.5
+      jul_c: 16.5
+      precip_mm_year: 520
+      wet_day_prob: 0.47
+      rh_mean: 81
+      rh_amp: 9
+    LAP:
+      name: Lappi
+      jan_c: -13.0
+      jul_c: 14.5
+      precip_mm_year: 490
+      wet_day_prob: 0.5
+      rh_mean: 82
+      rh_amp: 8
+  temperature:
+    coldest_doy: 20
+    anomaly_ar1_phi: 0.8
+    anomaly_sd_winter_c: 5.0
+    anomaly_sd_summer_c: 2.5
+    spatial_corr: 0.75
+    diurnal_amp_winter_c: 1.5
+    diurnal_amp_summer_c: 4.5
+    warmest_hour: 15
+    hourly_noise_sd_c: 0.4
+    hourly_noise_phi: 0.9
+  precipitation:
+    persistence: 0.35
+    seasonal_amp_prob: 0.1
+    seasonal_amp_amount: 0.3
+    peak_doy: 250
+    gamma_shape: 0.75
+    min_wet_mm: 0.1
+    spatial_corr: 0.6
+    hours_base: 2.0
+    hours_per_sqrt_mm: 1.5
+    dirichlet_alpha: 0.7
+    snow_below_c: 0.0
+  humidity:
+    peak_doy: 345
+    wet_day_bump_pct: 6.0
+    ar1_phi: 0.6
+    noise_sd_pct: 4.0
+    diurnal_amp_winter_pct: 3.0
+    diurnal_amp_summer_pct: 14.0
+    rain_hour_bump_pct: 5.0
+    clip_pct:
+    - 30
+    - 100
+    indoor:
+      temp_c: 21.0
+      moisture_source_pct: 8.0
+      clip_pct:
+      - 15
+      - 65
+  snowpack:
+    degree_day_mm_per_c_day: 3.0
+  yard:
+    wet_decay_h: 6.0
+    wet_ref_mm: 2.0
+inflow:
+  event_mass_mean_kg:
+    cardboard: 18
+    paper: 22
+    plastic_film: 9
+    mixed_waste: 12
+  event_mass_gamma_shape: 2.0
+  daily_noise:
+    ar1_phi: 0.6
+    sigma_log: 0.3
+  bulk_day:
+    prob_per_open_day: 0.02
+    multiplier:
+    - 2.0
+    - 4.0
+  press_prob_per_event: 0.85
+  test_cycle_rate_per_open_hour: 0.004
+moisture:
+  emc_oswin:
+    A: 5.8
+    B: 0.3
+    rh_max: 0.97
+  reference_mc_pct: 7.0
+  hygroscopic:
+    cardboard: 1.0
+    paper: 1.0
+    plastic_film: 0.0
+    mixed_waste: 0.3
+  storage_time_constant_h: 24
+  carry_in_frac:
+    cardboard: 0.04
+    paper: 0.035
+    plastic_film: 0.01
+    mixed_waste: 0.02
+  carry_absorbed_frac:
+    cardboard: 1.0
+    paper: 1.0
+    plastic_film: 0.1
+    mixed_waste: 0.5
+  outdoor_path:
+    open_hopper: 1.0
+    lidded_hopper: 1.0
+    indoor_shaft: 0.0
+  hopper_ingress:
+    open_hopper: 1.0
+    lidded_hopper: 0.1
+    indoor_shaft: 0.0
+  retained_frac:
+    cardboard: 0.3
+    paper: 0.3
+    plastic_film: 0.1
+    mixed_waste: 0.4
+  wet_density_coeff:
+    cardboard: 0.6
+    paper: 0.6
+    plastic_film: 0.0
+    mixed_waste: 0.2
+  moisture_extra_clip:
+  - -0.1
+  - 0.3
+  frost:
+    freeze_below_c: 0.0
+    penalty:
+      cardboard: 0.15
+      paper: 0.12
+      plastic_film: 0.08
+      mixed_waste: 0.15
+    wet_me_full: 0.03
+    thaw_time_constant_h: 12
+  ice_melt_rate_per_c_h: 0.02
+  seepage_time_constant_h: 120
+  container_temp_time_constant_h: 12
+  indoor_installation_temp_c: 12.0
+compaction:
+  rho_typ_kg_m3:
+    cardboard: 190
+    paper: 330
+    plastic_film: 140
+    mixed_waste: 400
+  compressibility:
+    cardboard: 0.25
+    paper: 0.15
+    plastic_film: 0.35
+    mixed_waste: 0.12
+  springback:
+    cardboard: 0.04
+    paper: 0.02
+    plastic_film: 0.08
+    mixed_waste: 0.02
+  springback_time_constant_h: 3.0
+  p0_bar: 20.0
+  p_ref_bar: 120.0
+  machine_factor_cv: 0.15
+  daily_factor_cv: 0.07
+  force_exponent: 0.15
+  force_ref_t: 30
+  n_layers: 40
+hydraulics:
+  p_idle_bar:
+  - 20
+  - 30
+  k_bar: 150.0
+  k_machine_cv: 0.05
+  fill_onset: 0.07
+  fill_exponent: 1.0
+  density_exponent: 1.0
+  stiffness:
+    cardboard: 1.0
+    paper: 1.1
+    plastic_film: 0.85
+    mixed_waste: 0.9
+  wet_softening:
+    cardboard: 2.5
+    paper: 2.5
+    plastic_film: 0.0
+    mixed_waste: 0.5
+  frost_stiffening: 1.5
+  relief_bar: 240.0
+  relief_cv: 0.02
+  viscosity_coeff_per_c: 0.004
+  viscosity_ref_c: 40.0
+  oil:
+    heat_per_stroke_c: 0.8
+    cool_time_constant_h: 2.0
+    max_c: 60.0
+  stroke_resistance_cv: 0.05
+  spikes:
+    prob_per_stroke:
+      cardboard: 0.06
+      paper: 0.02
+      plastic_film: 0.01
+      mixed_waste: 0.03
+    bar:
+    - 20
+    - 80
+  curve:
+    n_points: 16
+    contact_onset: 0.07
+    ram_ingress_frac: 0.2
+    contact_span: 0.15
+    contact_noise: 0.03
+    shape_base: 1.2
+    shape_gain: 2.0
+    loose_bar_max: 8.0
+    contact_threshold_bar: 15.0
+    sample_bins: 5
+  stroke:
+    duration_load_gain: 0.35
+    duration_cold_per_c: 0.003
+    duration_cold_ref_c: 20.0
+    duration_cv: 0.03
+    energy_base_load: 0.25
+    energy_load_gain: 0.65
+    motor_efficiency: 0.88
+sensors:
+  fill_mode: pressure_derived
+  fill:
+    noise_sd_pct: 3.0
+    gain_bias_sd: 0.015
+    gain_bias_clip: 0.03
+    drift_sd_per_day: 0.001
+    round_to_pct: 1.0
+  pressure_fill:
+    rolling_strokes: 10
+    p_idle_nominal_bar: 25.0
+    full_backpressure_bar: 150.0
+    calibration: per_installation
+    compensate_oil_temp: false
+  false_full:
+    rate_per_day: 0.0167
+    duration_days:
+    - 1
+    - 4
+    level_pct:
+    - 88
+    - 97
+    noise_sd_pct: 1.0
+    min_true_fill_pct: 15.0
+  pressure:
+    noise_sd_bar: 4.0
+    quantum_bar: 0.5
+    gain_bias_sd: 0.01
+    gain_drift_sd_per_year: 0.02
+  dropout_prob: 0.01
+  outage:
+    rate_per_day: 0.02
+    duration_h_lognormal:
+    - 1.8
+    - 0.8
+    max_h: 96
+  ref_scale_noise: 0.005
+operations:
+  max_interval_days: 28
+  scheduled_lead_h: 30
+  truck_delay_h:
+  - 4
+  - 30
+  truck_hours:
+  - 6
+  - 18
+  no_sunday: true
+  no_holidays: true
+  duo_residue_frac:
+  - 0.0
+  - 0.02
+  initial_fill_frac:
+  - 0.0
+  - 0.8
+  weighbridge:
+    resolution_kg: 20
+    noise_sd_kg: 15

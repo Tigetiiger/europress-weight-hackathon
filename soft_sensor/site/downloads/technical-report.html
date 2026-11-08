@@ -1,0 +1,171 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Technical report — hydraulic soft sensor</title><meta name="color-scheme" content="light dark"><style>
+:root{--bg:#fbfaf7;--fg:#1c2026;--muted:#5b6370;--card:#ffffff;--line:#d9dcd3;--rule:#2d3136;--accent:#2f5d8a;
+--good:#e3efe3;--good-fg:#1f4d2a;--code:#f0efe9;--tip-bg:#23272e;--tip-fg:#f3f4f6;--mark:#f3efdc}
+@media (prefers-color-scheme:dark){:root{--bg:#15181d;--fg:#dde1e6;--muted:#9aa3ad;--card:#1c2026;--line:#333941;
+--rule:#c9ced5;--accent:#8fb4dc;--good:#1d3324;--good-fg:#a9dcb5;--code:#242a32;--tip-bg:#f3f4f6;--tip-fg:#1c2026;--mark:#2d2b22}}
+*{box-sizing:border-box}html{scroll-padding-top:1.2rem;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 Georgia,"Iowan Old Style","Palatino Linotype",
+"Source Serif Pro",serif;-webkit-text-size-adjust:100%}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);max-width:1240px;margin:0 auto;padding:0 16px}
+@media (min-width:1000px){.layout{grid-template-columns:250px minmax(0,1fr);gap:2.5rem}
+nav.toc{position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;padding:1.6rem 0 2rem}}
+nav.toc{font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:1rem 0 .4rem;border-bottom:1px solid var(--line)}
+@media (min-width:1000px){nav.toc{border-bottom:0}}
+nav.toc p{margin:0 0 .5rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:.75rem;color:var(--muted)}
+nav.toc ol{list-style:none;margin:0;padding:0}nav.toc ol ol{padding-left:1.4rem;margin:.15rem 0 .35rem}
+nav.toc li{margin:.15rem 0}nav.toc a{color:var(--fg);text-decoration:none}nav.toc a:hover{color:var(--accent);text-decoration:underline}
+nav.toc .n{color:var(--muted);display:inline-block;min-width:1.6em}nav.toc ol ol .n{min-width:2.4em}
+@media (max-width:999px){nav.toc ol ol{display:none}nav.toc ol{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 1rem}}
+main{min-width:0;padding-bottom:3rem}
+section{padding-top:2.4rem}section.doc-head{padding-top:1.8rem}
+h1{font-size:clamp(1.55rem,3.2vw,2.15rem);line-height:1.25;margin:.4rem 0 .6rem;font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.5rem;line-height:1.3;margin:0 0 1rem;padding-bottom:.35rem;border-bottom:2px solid var(--rule)}
+h3{font-size:1.15rem;margin:2rem 0 .6rem}h4{font-size:1rem;margin:1.5rem 0 .4rem;font-family:system-ui,sans-serif}
+h2 .n,h3 .n,h4 .n{color:var(--muted);font-weight:400;margin-right:.5em}
+a{color:var(--accent)}p,li,dd{max-width:72ch}.muted{color:var(--muted)}
+.abstract{font-size:1.02rem;border-left:3px solid var(--rule);padding:.2rem 0 .2rem 1rem;margin:1.2rem 0}
+.meta{font:14px/1.5 system-ui,sans-serif;color:var(--muted);margin:.4rem 0 1rem}
+.notice{border:1px solid var(--line);background:var(--code);padding:.6rem .9rem;border-radius:4px;font-family:system-ui,sans-serif;font-size:.92rem}
+.note{color:var(--muted);font-style:italic;border:1px dashed var(--line);padding:.5rem .8rem;border-radius:4px}
+.tcap,figcaption{font:.86rem/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--muted)}
+.tcap{margin:1.4rem 0 .35rem;max-width:none}.tcap b,figcaption b{color:var(--fg);font-weight:600}
+.tbl{overflow-x:auto;margin:0 0 1rem;max-width:100%}
+table{border-collapse:collapse;font:.875rem/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;width:100%}
+th,td{padding:.32rem .65rem;text-align:right;border-bottom:1px solid var(--line);vertical-align:top;white-space:nowrap}
+th{border-bottom:2px solid var(--rule);font-weight:600;text-align:right;background:transparent;white-space:normal;min-width:6ch}
+td:first-child,th:first-child,td.l,th.l{text-align:left}td.l,th.l{white-space:normal;min-width:12ch}
+td.good{background:var(--good);color:var(--good-fg);font-weight:600}
+th.lift,td.lift{background:var(--mark)}tr.key td{font-weight:700}tr.fam td{background:var(--code);font-weight:600;text-align:left}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--code);padding:.05rem .3rem;border-radius:3px;font-size:.88em}
+pre{background:var(--code);padding:.8rem 1rem;border-radius:4px;overflow-x:auto;font-size:.82rem;line-height:1.5;border-left:3px solid var(--line)}
+pre code{padding:0;background:none;font-size:inherit}
+.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:1.2rem;margin:1rem 0 1.4rem}
+.figs.one{grid-template-columns:minmax(0,1fr);max-width:860px}
+figure{margin:0}figure img{max-width:100%;height:auto;display:block;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:3px}
+figcaption{margin-top:.45rem}a.zoom img{cursor:zoom-in}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:.5rem;margin:1rem 0;font-family:system-ui,sans-serif}
+.flow .box{flex:1 1 180px;background:var(--card);border:1px solid var(--line);border-top:3px solid var(--rule);padding:.6rem .8rem;font-size:.86rem}
+.flow .box b{display:block;font-size:.95rem;margin-bottom:.25rem}.flow .box ul{margin:.2rem 0;padding-left:1.1rem}
+.flow .arrow{align-self:center;font-size:1.5rem;color:var(--muted)}
+@media (max-width:760px){.flow{flex-direction:column}.flow .arrow{transform:rotate(90deg);text-align:center}}
+.bars{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:1rem;font-family:system-ui,sans-serif}
+.bar-card{background:var(--card);border:1px solid var(--line);padding:.6rem .8rem}
+.bar-card h5{margin:.1rem 0 .5rem;font-size:.92rem}.bar{display:grid;grid-template-columns:11rem 1fr 3.2rem;gap:.4rem;align-items:center;font-size:.8rem;margin:.15rem 0}
+.bar code{font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bar .track{background:var(--code);height:.7rem}
+.bar .fill{background:var(--accent);height:100%}.bar span{text-align:right;color:var(--muted)}
+dl.gloss{font-size:.95rem}dl.gloss dt{font-weight:700;margin-top:.7rem}dl.gloss dt code{font-weight:700}
+dl.gloss dt .cat{font:.72rem/1 system-ui,sans-serif;color:var(--muted);font-weight:400;margin-left:.5em;text-transform:uppercase;letter-spacing:.04em}
+dl.gloss dd{margin:.1rem 0 0 0}
+ul.dl{list-style:none;padding:0;margin:0}ul.dl li{border-bottom:1px solid var(--line);padding:.6rem 0;max-width:none}
+ul.dl li a{font-weight:600}ul.dl .sz{font:.8rem system-ui,sans-serif;color:var(--muted);margin-left:.5em}ul.dl .d{display:block;font-size:.92rem;max-width:80ch}
+.term{border-bottom:1px dotted var(--muted);cursor:help;text-decoration:none;color:inherit}
+.term:focus{outline:2px solid var(--accent);outline-offset:1px}
+#tip{position:fixed;z-index:60;max-width:min(340px,calc(100vw - 16px));background:var(--tip-bg);color:var(--tip-fg);padding:.5rem .7rem;
+border-radius:5px;font:.83rem/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.25);pointer-events:none}
+#tip[hidden]{display:none}#tip b{display:block;margin-bottom:.15rem}
+.lb{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;cursor:zoom-out}
+.lb[hidden]{display:none}.lb img{max-width:100%;max-height:calc(100vh - 7rem);object-fit:contain;background:#fff;border-radius:4px}
+.lb-x{position:fixed;top:12px;right:12px;width:3rem;height:3rem;border-radius:50%;border:0;background:#fff;color:#000;font-size:1.8rem;line-height:1;cursor:pointer}
+.lb-cap{color:#eee;font:.9rem system-ui,sans-serif;margin:.6rem 0 0;text-align:center;max-width:90ch}.lb-cap a{color:#9cc8ff}
+nav.toc.spy li.has-sub:not(.open)>ol{display:none}
+nav.toc a[aria-current]{color:var(--accent);font-weight:700}nav.toc ol ol a[aria-current]{font-weight:600}
+nav.toc a[aria-current] .n{color:var(--accent)}
+details.gallery{margin:1.2rem 0 .4rem;border:1px solid var(--line);border-radius:6px;background:var(--card);
+font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+details.gallery>summary{cursor:pointer;padding:.75rem 1rem;font-weight:600;font-size:1rem}
+details.gallery>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+details.gallery[open]>summary{border-bottom:1px solid var(--line)}
+.gnote{margin:.8rem 1rem .2rem;color:var(--muted);font-size:.88rem;max-width:none}
+ol.glist{list-style:none;margin:0;padding:.6rem 1rem 1rem;display:grid;gap:1.1rem 1.4rem;
+grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr))}
+li.gitem{max-width:none;margin:0;border-top:1px solid var(--line);padding-top:.8rem;min-width:0}
+li.gitem img{width:100%;height:auto;display:block;background:#fff;border:1px solid var(--line);border-radius:3px;cursor:zoom-in}
+li.gitem img[data-src]{min-height:180px}
+.gtext p{margin:.5rem 0 0;font-size:.86rem;line-height:1.5;max-width:none}.gtext p.gtitle{font-weight:600}
+.gtext .gtitle a{text-decoration:none}
+figcaption .fdesc{display:block;margin-top:.3rem}
+.lb-res{font-style:normal;color:#bbb}
+footer{border-top:1px solid var(--line);margin-top:3rem;padding-top:1rem;font:.85rem/1.5 system-ui,sans-serif;color:var(--muted)}
+</style></head><body><div class="layout"><main><section><p><a href="../index.html#sec-results">← back to the documentation</a></p><h1>Hydraulic soft sensor - container mass report (<code>full400</code>)</h1>
+<p>On the <code>time</code> (same machines, later months) split the selected soft sensor estimates the mass in the hour before emptying with a mean error of <strong>3.8 %</strong> (median 3.1 %, 72 % of lifts within 5 %, n = 4876), against 28.3 % for the naive fill × nominal density estimate; 4 of 4 materials meet the &lt; 5 % target. The calibrated p10–p90 interval covers 78 % of lift masses (target 80 %). On the <code>bins</code> (unseen machines) split the selected soft sensor estimates the mass in the hour before emptying with a mean error of <strong>5.2 %</strong> (median 4.4 %, 55 % of lifts within 5 %, n = 1221), against 32.1 % for the naive fill × nominal density estimate; 1 of 4 materials meet the &lt; 5 % target (missing: cardboard, paper, mixed_waste). The calibrated p10–p90 interval covers 78 % of lift masses (target 80 %).</p>
+<blockquote><strong>All data is synthetic</strong> (simulator output for the Europress hackathon). The numbers demonstrate the method, not field performance.</blockquote>
+<p><img src="../img/model/lift_error_by_material.png" alt="mean % error at lift by material" loading="lazy"></p>
+<h2>Compute</h2>
+<div class="tbl"><table><thead><tr><th>item</th><th>value</th></tr></thead><tbody><tr><td>training wall time (all splits)</td><td>911 s</td></tr><tr><td>feature build</td><td>10.0 s</td></tr><tr><td>peak memory (RSS)</td><td>4.49 GB</td></tr><tr><td>hourly rows / machines</td><td>3,504,000 / 400</td></tr><tr><td>split <code>time</code> wall time</td><td>550 s</td></tr><tr><td>split <code>bins</code> wall time</td><td>350 s</td></tr><tr><td>prediction run</td><td>3,504,000 rows in 81.0 s (features + predict 79.5 s)</td></tr><tr><td>prediction cost</td><td>22.7 µs per machine-hour</td></tr><tr><td>prediction peak memory</td><td>3.97 GB</td></tr></tbody></table></div>
+<h2>Split <code>time</code> (same machines, later months)</h2>
+<p>Same machines, trained on the first 75 % of time and tested on the last 25 %. Training machines: 400, test machines: 400, test from 2026-07-01 17:15:00+03:00. Rows: train 2,070,084, val 262,800, cal 262,800, test 876,000.</p>
+<p>Selected setup: cardboard → <strong>per_material</strong>, paper → <strong>shared</strong>, plastic_film → <strong>per_material</strong>, mixed_waste → <strong>per_material</strong>.</p>
+<p><strong>At lift (hour before emptying vs weighbridge):</strong></p>
+<div class="tbl"><table><thead><tr><th>material</th><th>n</th><th>MAE kg</th><th>mean %</th><th>median %</th><th>within 5 %</th><th>within 10 %</th><th>bias kg</th><th>coverage</th><th>width kg</th></tr></thead><tbody><tr><td>cardboard</td><td>2479</td><td>121</td><td>4.0</td><td>3.3</td><td>69 %</td><td>95 %</td><td>-42</td><td>78 %</td><td>412</td></tr><tr><td>paper</td><td>702</td><td>139</td><td>4.3</td><td>3.4</td><td>68 %</td><td>92 %</td><td>-0</td><td>80 %</td><td>475</td></tr><tr><td>plastic_film</td><td>1168</td><td>58</td><td>3.3</td><td>2.6</td><td>78 %</td><td>97 %</td><td>-2</td><td>79 %</td><td>216</td></tr><tr><td>mixed_waste</td><td>527</td><td>147</td><td>3.1</td><td>2.5</td><td>83 %</td><td>97 %</td><td>-9</td><td>77 %</td><td>530</td></tr><tr><td><strong>overall</strong></td><td>4876</td><td>112</td><td>3.8</td><td>3.1</td><td>72 %</td><td>95 %</td><td>-23</td><td>78 %</td><td>387</td></tr></tbody></table></div>
+<p><strong>Hourly (every test hour):</strong></p>
+<div class="tbl"><table><thead><tr><th>material</th><th>MAE kg</th><th>mean %</th><th>coverage</th></tr></thead><tbody><tr><td>cardboard</td><td>74</td><td>5.6</td><td>80 %</td></tr><tr><td>paper</td><td>83</td><td>5.9</td><td>78 %</td></tr><tr><td>plastic_film</td><td>36</td><td>4.4</td><td>79 %</td></tr><tr><td>mixed_waste</td><td>84</td><td>4.3</td><td>82 %</td></tr><tr><td>overall</td><td>67</td><td>5.2</td><td>80 %</td></tr></tbody></table></div>
+<p><img src="../img/model/pred_vs_true_time.png" alt="predicted vs true at lift, time" loading="lazy"></p>
+<h2>Split <code>bins</code> (unseen machines)</h2>
+<p>Unseen machines (25 % held out, stratified by material), tested on the last 25 % of the period. Training machines: 240, test machines: 100, test from 2026-07-01 17:15:00+03:00. Rows: train 1,556,196, val 201,569, cal 188,497, test 219,000.</p>
+<p>Selected setup: cardboard → <strong>per_material</strong>, paper → <strong>per_material</strong>, plastic_film → <strong>per_material</strong>, mixed_waste → <strong>per_material</strong>.</p>
+<p><strong>At lift (hour before emptying vs weighbridge):</strong></p>
+<div class="tbl"><table><thead><tr><th>material</th><th>n</th><th>MAE kg</th><th>mean %</th><th>median %</th><th>within 5 %</th><th>within 10 %</th><th>bias kg</th><th>coverage</th><th>width kg</th></tr></thead><tbody><tr><td>cardboard</td><td>610</td><td>148</td><td>5.2</td><td>4.4</td><td>57 %</td><td>89 %</td><td>-59</td><td>84 %</td><td>564</td></tr><tr><td>paper</td><td>184</td><td>199</td><td>5.5</td><td>4.5</td><td>53 %</td><td>83 %</td><td>-24</td><td>88 %</td><td>935</td></tr><tr><td>plastic_film</td><td>294</td><td>76</td><td>4.6</td><td>3.8</td><td>62 %</td><td>93 %</td><td>4</td><td>81 %</td><td>276</td></tr><tr><td>mixed_waste</td><td>133</td><td>392</td><td>6.3</td><td>6.0</td><td>39 %</td><td>88 %</td><td>-159</td><td>34 %</td><td>532</td></tr><tr><td><strong>overall</strong></td><td>1221</td><td>165</td><td>5.2</td><td>4.4</td><td>55 %</td><td>89 %</td><td>-49</td><td>78 %</td><td>547</td></tr></tbody></table></div>
+<p><strong>Hourly (every test hour):</strong></p>
+<div class="tbl"><table><thead><tr><th>material</th><th>MAE kg</th><th>mean %</th><th>coverage</th></tr></thead><tbody><tr><td>cardboard</td><td>90</td><td>6.6</td><td>82 %</td></tr><tr><td>paper</td><td>106</td><td>6.6</td><td>84 %</td></tr><tr><td>plastic_film</td><td>48</td><td>5.9</td><td>77 %</td></tr><tr><td>mixed_waste</td><td>171</td><td>6.3</td><td>59 %</td></tr><tr><td>overall</td><td>90</td><td>6.4</td><td>79 %</td></tr></tbody></table></div>
+<p><img src="../img/model/pred_vs_true_bins.png" alt="predicted vs true at lift, bins" loading="lazy"></p>
+<h2>Comparison ladder (mean % error at lift)</h2>
+<p>Each step adds signals: naive fill × nominal density → fill + press counts (LightGBM) → + peak hydraulic pressure → + pressure graph (pressure along the ram stroke: contact point, rise slope, mean pressure, completion) → + weather (full model, shared across materials); then the full per-material models and the setup selected per material on validation. The reported fill level itself is the machine&#x27;s approximate, pressure-derived estimate.</p>
+<p><strong><code>time</code> (same machines, later months)</strong></p>
+<div class="tbl"><table><thead><tr><th>step</th><th>cardboard</th><th>paper</th><th>plastic_film</th><th>mixed_waste</th><th><strong>overall</strong></th></tr></thead><tbody><tr><td>naive fill x density</td><td>26.4</td><td>25.4</td><td>33.0</td><td>30.8</td><td>28.3</td></tr><tr><td>fill + presses</td><td>5.9</td><td>6.0</td><td>5.9</td><td>5.3</td><td>5.9</td></tr><tr><td>+ pressure (peak)</td><td>4.6</td><td>4.6</td><td>3.8</td><td>3.7</td><td>4.3</td></tr><tr><td>+ pressure graph</td><td>4.2</td><td>4.4</td><td>3.6</td><td>3.5</td><td>4.0</td></tr><tr><td>+ weather (full, shared)</td><td>4.2</td><td>4.3</td><td>3.6</td><td>3.4</td><td>4.0</td></tr><tr><td>full, per material</td><td>4.0</td><td>4.0</td><td>3.3</td><td>3.1</td><td>3.8</td></tr><tr><td>selected</td><td>4.0</td><td>4.3</td><td>3.3</td><td>3.1</td><td>3.8</td></tr></tbody></table></div>
+<p><strong><code>bins</code> (unseen machines)</strong></p>
+<div class="tbl"><table><thead><tr><th>step</th><th>cardboard</th><th>paper</th><th>plastic_film</th><th>mixed_waste</th><th><strong>overall</strong></th></tr></thead><tbody><tr><td>naive fill x density</td><td>31.0</td><td>28.3</td><td>41.9</td><td>20.3</td><td>32.1</td></tr><tr><td>fill + presses</td><td>6.2</td><td>6.7</td><td>7.6</td><td>9.5</td><td>7.0</td></tr><tr><td>+ pressure (peak)</td><td>5.8</td><td>5.7</td><td>4.8</td><td>7.5</td><td>5.7</td></tr><tr><td>+ pressure graph</td><td>5.4</td><td>5.3</td><td>4.8</td><td>6.7</td><td>5.4</td></tr><tr><td>+ weather (full, shared)</td><td>5.1</td><td>5.1</td><td>4.7</td><td>6.9</td><td>5.2</td></tr><tr><td>full, per material</td><td>5.2</td><td>5.5</td><td>4.6</td><td>6.3</td><td>5.2</td></tr><tr><td>selected</td><td>5.2</td><td>5.5</td><td>4.6</td><td>6.3</td><td>5.2</td></tr></tbody></table></div>
+<p><img src="../img/model/ladder.png" alt="comparison ladder" loading="lazy"></p>
+<h2>Per-material vs shared model</h2>
+<p>Setup is chosen per material on the validation lifts (mean % error); <code>–</code> means no validation lifts of that material, in which case the shared model is kept.</p>
+<div class="tbl"><table><thead><tr><th>material</th><th>split</th><th>val shared</th><th>val per-material</th><th>test shared</th><th>test per-material</th><th>selected</th><th>better on test</th></tr></thead><tbody><tr><td>cardboard</td><td>time</td><td>4.1</td><td>3.9</td><td>4.2</td><td>4.0</td><td>per_material</td><td>per_material</td></tr><tr><td>paper</td><td>time</td><td>3.8</td><td>3.9</td><td>4.3</td><td>4.0</td><td>shared</td><td>per_material</td></tr><tr><td>plastic_film</td><td>time</td><td>3.7</td><td>3.2</td><td>3.6</td><td>3.3</td><td>per_material</td><td>per_material</td></tr><tr><td>mixed_waste</td><td>time</td><td>3.6</td><td>3.0</td><td>3.4</td><td>3.1</td><td>per_material</td><td>per_material</td></tr><tr><td>cardboard</td><td>bins</td><td>4.6</td><td>4.3</td><td>5.1</td><td>5.2</td><td>per_material</td><td>shared</td></tr><tr><td>paper</td><td>bins</td><td>5.7</td><td>5.7</td><td>5.1</td><td>5.5</td><td>per_material</td><td>shared</td></tr><tr><td>plastic_film</td><td>bins</td><td>4.9</td><td>4.7</td><td>4.7</td><td>4.6</td><td>per_material</td><td>per_material</td></tr><tr><td>mixed_waste</td><td>bins</td><td>6.6</td><td>6.1</td><td>6.9</td><td>6.3</td><td>per_material</td><td>per_material</td></tr></tbody></table></div>
+<h2>Interval coverage (target 80 %)</h2>
+<p>Intervals come from LightGBM quantile models (p10/p90) calibrated by <strong>normalised conformalised quantile regression (CQR)</strong>: on a separate calibration slice (machines/hours used neither for training nor for validation) the score max(q_lo − y, y − q_hi) / width is computed and the interval is widened by its finite-sample 80 % quantile. Calibration is <strong>Mondrian</strong> by material × fill bucket (fill edges 50.0, 80.0 %); strata with fewer than 30 calibration points fall back to the material, then to the pool.</p>
+<div class="tbl"><table><thead><tr><th>material</th><th>split</th><th>lift coverage</th><th>lift width kg</th><th>hourly coverage</th><th>hourly width kg</th></tr></thead><tbody><tr><td>cardboard</td><td>time</td><td>78 %</td><td>412</td><td>80 %</td><td>261</td></tr><tr><td>paper</td><td>time</td><td>80 %</td><td>475</td><td>78 %</td><td>279</td></tr><tr><td>plastic_film</td><td>time</td><td>79 %</td><td>216</td><td>79 %</td><td>131</td></tr><tr><td>mixed_waste</td><td>time</td><td>77 %</td><td>530</td><td>82 %</td><td>344</td></tr><tr><td>overall</td><td>time</td><td>78 %</td><td>387</td><td>80 %</td><td>239</td></tr><tr><td>cardboard</td><td>bins</td><td>84 %</td><td>564</td><td>82 %</td><td>315</td></tr><tr><td>paper</td><td>bins</td><td>88 %</td><td>935</td><td>84 %</td><td>437</td></tr><tr><td>plastic_film</td><td>bins</td><td>81 %</td><td>276</td><td>77 %</td><td>151</td></tr><tr><td>mixed_waste</td><td>bins</td><td>34 %</td><td>532</td><td>59 %</td><td>391</td></tr><tr><td>overall</td><td>bins</td><td>78 %</td><td>547</td><td>79 %</td><td>300</td></tr></tbody></table></div>
+<p>Lift coverage more than 5 pp below target: mixed_waste/bins (34 %). Calibration pools all hours of a stratum, while the lift hour is the fullest, hardest hour of a cycle; on unseen machines the calibration machines are also few, so their error scale need not transfer.</p>
+<p><img src="../img/model/coverage_by_material.png" alt="interval coverage" loading="lazy"></p>
+<h2>Hourly mass curves</h2>
+<p><img src="../img/model/mass_curves_time.png" alt="hourly mass curves" loading="lazy"></p>
+<h2>Error breakdowns (lift, selected model)</h2>
+<p><strong>Infeed type</strong></p>
+<div class="tbl"><table><thead><tr><th>infeed</th><th>time mean %</th><th>time n</th><th>bins mean %</th><th>bins n</th></tr></thead><tbody><tr><td>indoor_shaft</td><td>3.9</td><td>1611</td><td>5.2</td><td>286</td></tr><tr><td>lidded_hopper</td><td>3.8</td><td>1167</td><td>4.9</td><td>426</td></tr><tr><td>open_hopper</td><td>3.7</td><td>2098</td><td>5.5</td><td>509</td></tr></tbody></table></div>
+<p><strong>Drainage (0 = no, 1 = yes)</strong></p>
+<div class="tbl"><table><thead><tr><th>drainage</th><th>time mean %</th><th>time n</th><th>bins mean %</th><th>bins n</th></tr></thead><tbody><tr><td>0.0</td><td>3.9</td><td>3499</td><td>5.4</td><td>834</td></tr><tr><td>1.0</td><td>3.5</td><td>1377</td><td>4.8</td><td>387</td></tr></tbody></table></div>
+<p><strong>Equipment class</strong></p>
+<div class="tbl"><table><thead><tr><th>equipment_class</th><th>time mean %</th><th>time n</th><th>bins mean %</th><th>bins n</th></tr></thead><tbody><tr><td>COMBI</td><td>3.8</td><td>3827</td><td>5.1</td><td>986</td></tr><tr><td>DUO</td><td>3.7</td><td>1049</td><td>5.9</td><td>235</td></tr></tbody></table></div>
+<p><strong>Container size</strong></p>
+<div class="tbl"><table><thead><tr><th>container_size</th><th>time mean %</th><th>time n</th><th>bins mean %</th><th>bins n</th></tr></thead><tbody><tr><td>&lt;=14 m3</td><td>3.9</td><td>2623</td><td>5.0</td><td>619</td></tr><tr><td>15-20 m3</td><td>3.7</td><td>1809</td><td>5.4</td><td>539</td></tr><tr><td>&gt;20 m3</td><td>3.7</td><td>444</td><td>5.8</td><td>63</td></tr></tbody></table></div>
+<p><strong>False-full episode in the cycle</strong></p>
+<div class="tbl"><table><thead><tr><th>false_full_in_cycle</th><th>time mean %</th><th>time n</th><th>bins mean %</th><th>bins n</th></tr></thead><tbody><tr><td>no</td><td>3.5</td><td>4294</td><td>5.0</td><td>1073</td></tr><tr><td>yes</td><td>5.7</td><td>582</td><td>6.7</td><td>148</td></tr></tbody></table></div>
+<p><strong>Weather in the week before lift</strong></p>
+<div class="tbl"><table><thead><tr><th>week</th><th>time mean %</th><th>time n</th><th>bins mean %</th><th>bins n</th></tr></thead><tbody><tr><td>dry (bottom 25 %)</td><td>3.7</td><td>1247</td><td>5.4</td><td>309</td></tr><tr><td>middle</td><td>3.8</td><td>2409</td><td>5.0</td><td>604</td></tr><tr><td>wet (top 25 % rain7)</td><td>4.0</td><td>1220</td><td>5.5</td><td>308</td></tr></tbody></table></div>
+<h2>Learning curve (unseen machines, shared model)</h2>
+<div class="tbl"><table><thead><tr><th>training machines</th><th><strong>overall</strong></th><th>cardboard</th><th>paper</th><th>plastic_film</th><th>mixed_waste</th></tr></thead><tbody><tr><td>10</td><td>9.7</td><td>8.3</td><td>10.5</td><td>7.7</td><td>19.0</td></tr><tr><td>25</td><td>7.6</td><td>6.6</td><td>9.8</td><td>6.2</td><td>12.3</td></tr><tr><td>50</td><td>6.7</td><td>6.3</td><td>7.1</td><td>6.6</td><td>7.7</td></tr><tr><td>100</td><td>5.9</td><td>5.8</td><td>6.0</td><td>5.4</td><td>7.6</td></tr><tr><td>240</td><td>5.4</td><td>5.1</td><td>5.2</td><td>5.0</td><td>7.6</td></tr></tbody></table></div>
+<p>No size below the full 240 training machines gets within 0.5 pp of the all-machines 5.4 %, so by this rule a pilot needs all 240 and the curve has not flattened yet. The largest gain is from 10 to 25 machines (9.7 → 7.6 %).</p>
+<p><img src="../img/model/learning_curve.png" alt="learning curve" loading="lazy"></p>
+<h2>Feature importance (top 5 by gain share)</h2>
+<p>Materials served by the shared model show the same ranking (one model).</p>
+<div class="tbl"><table><thead><tr><th>material</th><th>split</th><th>model</th><th>top features</th></tr></thead><tbody><tr><td>cardboard</td><td>time</td><td>per_material</td><td>p_ewm (50 %), curve_rise_slope_ewm (37 %), pressure_kg_m3 (7 %), presses_cycle (2 %), container_volume_m3 (1 %)</td></tr><tr><td>mixed_waste</td><td>time</td><td>per_material</td><td>p_ewm (47 %), curve_rise_slope_ewm (42 %), pressure_kg_m3 (6 %), presses_cycle (2 %), fill_ffill (1 %)</td></tr><tr><td>paper</td><td>time</td><td>shared</td><td>pressure_kg_m3 (84 %), naive_kg_m3 (5 %), curve_rise_slope_ewm (4 %), graph_kg_m3 (2 %), p_ewm (2 %)</td></tr><tr><td>plastic_film</td><td>time</td><td>per_material</td><td>p_ewm (47 %), curve_rise_slope_ewm (37 %), pressure_kg_m3 (11 %), presses_cycle (2 %), p_last (1 %)</td></tr><tr><td>cardboard</td><td>bins</td><td>per_material</td><td>p_ewm (52 %), curve_rise_slope_ewm (36 %), pressure_kg_m3 (7 %), presses_cycle (1 %), container_volume_m3 (1 %)</td></tr><tr><td>mixed_waste</td><td>bins</td><td>per_material</td><td>curve_rise_slope_ewm (65 %), p_ewm (20 %), pressure_kg_m3 (10 %), presses_cycle (2 %), fill_ffill (1 %)</td></tr><tr><td>paper</td><td>bins</td><td>per_material</td><td>p_ewm (44 %), curve_rise_slope_ewm (23 %), pressure_kg_m3 (23 %), presses_cycle (5 %), naive_kg_m3 (2 %)</td></tr><tr><td>plastic_film</td><td>bins</td><td>per_material</td><td>p_ewm (45 %), curve_rise_slope_ewm (38 %), pressure_kg_m3 (13 %), presses_cycle (2 %), fill_ffill (1 %)</td></tr></tbody></table></div>
+<p><img src="../img/model/feature_importance_time.png" alt="feature importance time" loading="lazy"></p>
+<p><img src="../img/model/shap_time.png" alt="SHAP summary time" loading="lazy"></p>
+<p><img src="../img/model/feature_importance_bins.png" alt="feature importance bins" loading="lazy"></p>
+<p><img src="../img/model/shap_bins.png" alt="SHAP summary bins" loading="lazy"></p>
+<h2>Target check (mean % error at lift &lt; 5 %)</h2>
+<div class="tbl"><table><thead><tr><th>material</th><th>split</th><th>mean % at lift</th><th>n lifts</th><th>&lt; 5 %</th></tr></thead><tbody><tr><td>cardboard</td><td>time</td><td>4.0</td><td>2479</td><td>yes</td></tr><tr><td>paper</td><td>time</td><td>4.3</td><td>702</td><td>yes</td></tr><tr><td>plastic_film</td><td>time</td><td>3.3</td><td>1168</td><td>yes</td></tr><tr><td>mixed_waste</td><td>time</td><td>3.1</td><td>527</td><td>yes</td></tr><tr><td>cardboard</td><td>bins</td><td>5.2</td><td>610</td><td><strong>no</strong></td></tr><tr><td>paper</td><td>bins</td><td>5.5</td><td>184</td><td><strong>no</strong></td></tr><tr><td>plastic_film</td><td>bins</td><td>4.6</td><td>294</td><td>yes</td></tr><tr><td>mixed_waste</td><td>bins</td><td>6.3</td><td>133</td><td><strong>no</strong></td></tr></tbody></table></div>
+<p><strong>Not met, and the likely reasons from the data:</strong></p>
+<ul><li><strong>cardboard, <code>bins</code> split (5.2 %)</strong>: the error is broad-based (median 4.4 %), not driven by a few outliers; 69 of 610 lifts had a false-full episode in the cycle (6.9 % vs 5.0 % without); the fleet has 200 cardboard machine(s) of 400, at most 150 of them in training.</li><li><strong>paper, <code>bins</code> split (5.5 %)</strong>: the error is broad-based (median 4.5 %), not driven by a few outliers; 19 of 184 lifts had a false-full episode in the cycle (7.2 % vs 5.3 % without); the fleet has 60 paper machine(s) of 400, at most 45 of them in training.</li><li><strong>mixed_waste, <code>bins</code> split (6.3 %)</strong>: the error is broad-based (median 6.0 %), not driven by a few outliers; 18 of 133 lifts had a false-full episode in the cycle (7.1 % vs 6.2 % without); the fleet has 40 mixed_waste machine(s) of 400, at most 30 of them in training.</li></ul></section></main></div><div id="lb" class="lb" hidden role="dialog" aria-modal="true" aria-label="Enlarged image">
+<button class="lb-x" type="button" aria-label="Close image">&times;</button><img alt="">
+<p class="lb-cap"><span></span> · <a target="_blank" rel="noopener">open full size</a> <em class="lb-res"></em> · click anywhere
+or press Esc to close</p></div>
+<script>(function(){var lb=document.getElementById("lb");if(!lb)return;var im=lb.querySelector("img"),
+cap=lb.querySelector(".lb-cap span"),full=lb.querySelector(".lb-cap a"),res=lb.querySelector(".lb-res"),last=null,cur=null;
+function close(){lb.hidden=true;cur=null;im.removeAttribute("src");document.body.style.overflow="";if(last)last.focus();}
+function show(a){var hi=a.getAttribute("href"),lo=a.getAttribute("data-lo")||hi;cur=last=a;im.src=lo;
+im.alt=a.dataset.cap||"";cap.textContent=a.dataset.cap||"";full.href=hi;res.textContent="";lb.hidden=false;
+document.body.style.overflow="hidden";lb.querySelector(".lb-x").focus();if(hi===lo)return;
+res.textContent="(loading high resolution…)";var pre=new Image();
+pre.onload=function(){if(cur===a){im.src=hi;res.textContent="(high resolution)";}};
+pre.onerror=function(){if(cur===a){full.href=lo;res.textContent="";}};pre.src=hi;}
+document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a.zoom");
+if(a&&!e.ctrlKey&&!e.metaKey&&!e.shiftKey){e.preventDefault();show(a);return;}
+if(!lb.hidden&&!(e.target.closest&&e.target.closest(".lb-cap a")))close();});
+document.addEventListener("keydown",function(e){if(!lb.hidden&&e.key==="Escape")close();});})();</script></body></html>
