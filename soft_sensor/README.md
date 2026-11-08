@@ -10,7 +10,8 @@ weather, so customers can check the weighbridge figure.
 pressure settings.**
 
 The soft-sensor training/prediction pipeline that uses this data lives in
-[`weight_train/`](weight_train/README.md); results are in `models/<run>/REPORT.md`.
+[`weight_train/`](weight_train/README.md) (how to train, predict and evaluate the model);
+results are in `models/<run>/REPORT.md`.
 
 ---
 
@@ -25,8 +26,20 @@ python -m venv .venv && .venv/bin/pip install -r requirements.txt
 
 .venv/bin/python validate.py runs/full400     # sanity report + plots in runs/full400/plots/
 .venv/bin/python baseline.py runs/full400     # LightGBM: fill-only vs +pressure vs +rain (~1 min)
-.venv/bin/python -m pytest -q                 # 18 tests, ~6 s
+.venv/bin/python -m pytest -q                 # 29 tests (20 simulator + 9 weight_train), ~30 s
+
+# train the soft sensor on the run (~15 min; details in weight_train/README.md)
+.venv/bin/python -m weight_train train --data runs/full400 --out models/full400 --seed 7
+.venv/bin/python -m weight_train predict --models models/full400 --input runs/full400/hourly.parquet \
+    --output models/full400/predictions.parquet
+# dashboard replay slice: all machines, test period + 40-day lookback (trims predictions.parquet in place)
+.venv/bin/python tools/make_replay_slice.py --src runs/full400 --dst runs/replay400 \
+    --metrics models/full400/metrics.json --predictions models/full400/predictions.parquet
 ```
+
+`runs/`, the trained bundles (`models/*/time/`, `models/*/bins/`) and all `.parquet` files are
+git-ignored. `../scripts/build_data.sh` runs the whole chain above (plus the docs site and
+dashboard data) on a fresh clone.
 
 CLI flags override `run.*` in the config: `--bins`, `--days`, `--seed`, `--out`,
 `--no-strokes`. The same seed gives bit-identical output (tested).
@@ -70,7 +83,7 @@ How the compactor behaves, and how the simulator models it:
 | `bins.parquet` | machine and site attributes, including hidden truth (`density_factor`, `fill_gain_bias`, `pressure_gain_*`, `relief_bar`, `p_idle_bar`, `daily_input_kg`, …) |
 | `weather_daily.parquet` | region, date, temp_mean/min/max_c, precip_mm, rain_mm, snow_mm, rh_pct, snow_swe_mm. **Includes the 28 burn-in days** before `start`, so 7-day lags exist from day 1 |
 | `lifts.parquet` | one row per lift: order and lift time, trigger (`fill`/`max_interval`), `false_full_trigger` (bridging active at the order **and** the reading without bridging would have stayed below the threshold), observed/true fill at order, true removed mass split into base / humidity / carried / hopper / free water / ice, `true_moisture_extra`, DUO residue, days since last lift, `weighbridge_net_kg` (±15 kg, 20 kg steps), tare, gross load |
-| `strokes.parquet` | one row per ram stroke: ts, oil temp, true and measured peak pressure, duration, energy |
+| `strokes.parquet` | one row per ram stroke: ts, stroke_in_hour, oil temp, true and measured peak pressure, duration, energy, and the four `curve_*` pressure-graph features |
 | `pressure_curves.parquet` | raw pressure graphs (16 points along the ram stroke) for the first 5 machines: bin_id, ts, stroke_in_hour, ram_position, pressure_bar |
 | `config_used.yaml`, `summary.json` | exact config, plus counts, lift means and the mass-balance ledger |
 
@@ -81,7 +94,7 @@ How the compactor behaves, and how the simulator models it:
 | bin_id, ts | str, timestamp[ns, Europe/Helsinki] | machine id, local hour start |
 | material, equipment_class, container_volume_m3, region, infeed, drainage | | static attributes |
 | rh_pct, temp_c, precip_mm_day | float | day mean RH, hourly air temperature, day total precipitation |
-| fill_pct | float | **firmware fill estimate derived from ram pressure** (default `sensors.fill_mode: pressure_derived`): approximate, biased by pack density, 0 below ~30 % fill, held between strokes; plus spurious-high episodes and NaN on dropout. `fill_mode: ultrasonic` gives a direct level sensor instead |
+| fill_pct | float | **firmware fill estimate derived from ram pressure** (default `sensors.fill_mode: pressure_derived`): approximate, biased by pack density, near 0 below ~10 % fill, held between strokes; plus spurious-high episodes and NaN on dropout. `fill_mode: ultrasonic` gives a direct level sensor instead |
 | presses | int | strokes this hour (exact) |
 | peak_pressure_bar | float | max stroke peak this hour (NaN if no stroke or dropout) |
 | lift_event | int8 | 1 = container emptied at the **start** of this hour (set from the lift itself, also when nothing was lifted) |
@@ -120,7 +133,7 @@ inflow (Poisson events × profiles) ──► base mass per hour ──► water
 
 Code layout (`compactor_sim/`): `config`, `timeline` (DST-safe local clock, Finnish
 holidays, truck hours), `fleet`, `weather`, `inflow`, `moisture`, `physics` (pure laws),
-`sensors`, `container` (the only stateful part), `operations`, `strokes`, `simulate`,
+`sensors`, `container` (the only stateful part), `operations`, `curves` (pressure graph), `strokes`, `simulate`,
 `output`, `cli`.
 
 Everything that does not depend on container state (weather, inflow, noise, sensor
@@ -225,8 +238,8 @@ quantisation.
 | carry-in | wet yard: fibre 4 % / 3.5 % of mass, plastics 1 % | brief magnitudes |
 | hopper ingress | rain × aperture area; lidded 10 %, shaft 0 | brief |
 | soak-up | fibre 30 %, plastics 10 % of free water | brief |
-| wet density | ×(1 + 0.6·moisture_extra), fibre only | brief |
-| frost | lumps +15 % (cardboard) / 12 % / 8 % volume, thaw τ 12 h; ice melt 2 %/h/°C | assumed |
+| wet density | ×(1 + 0.6·moisture_extra) for fibre (mixed waste 0.2, film 0) | brief |
+| frost | lumps +15 % (cardboard) / 12 % / 8 % / 15 % (mixed waste) volume, thaw τ 12 h; ice melt 2 %/h/°C | assumed |
 | container temperature | 12 h EMA of air | assumed |
 
 **Compaction / hydraulics / sensors / operations**
@@ -234,7 +247,7 @@ quantisation.
 |---|---|---|
 | rho_typ | 190 / 330 / 140 / 400 kg/m³ (cardboard / paper / film / mixed waste) at P_ref 120 bar | brief; mixed waste assumed (heavy) |
 | compressibility c | 0.25 / 0.15 / 0.35 / 0.12, P0 20 bar | brief c; mixed waste assumed (compacts less) |
-| springback | 4 / 2 / 8 / 6 %, τ 3 h | assumed |
+| springback | 4 / 2 / 8 / 2 %, τ 3 h | assumed |
 | machine density factor | lognormal cv 15 % × (force/30 t)^0.15 | brief cv, assumed force law |
 | daily density factor | cv 7 % | brief |
 | P_idle, k, relief | 20–30 bar, k 150 bar (cv 5 %), relief 240 bar (cv 2 %); back pressure from 7 % fill, linear in fill (`fill_onset` 0.07, exponent 1.0); density exponent 1.0 (medium: pressure mostly tracks volume); crushed-item spikes +20–80 bar (6 % of cardboard strokes, 1–3 % others) | brief ranges; onset, linearity, spikes from machine behaviour; values assumed (**real values unknown**) |
@@ -286,8 +299,8 @@ splits, intervals and the pressure graph is `weight_train/` (results in `models/
 | features | mean % err | median | p90 | WAPE |
 |---|---|---|---|---|
 | fill only | 23.3 | 15.1 | 40.2 | 19.0 |
-| + pressure | 7.2 | 5.8 | 14.6 | 7.1 |
-| + pressure + presses | 5.2 | 4.1 | 10.8 | 5.2 |
+| + pressure | 7.3 | 5.9 | 14.8 | 7.3 |
+| + pressure + presses | 5.2 | 4.2 | 10.8 | 5.2 |
 | + rain + RH (7 d) | 5.2 | 4.1 | 10.7 | 5.1 |
 
 With the fill reading itself derived from pressure, fill alone is a weak predictor of weight
@@ -310,7 +323,7 @@ weather adds almost nothing measurable.
   telemetry outages still happen. Orders use only valid readings.
 * Overflow is reduced but not gone. Fast sites still overfill before the truck arrives:
   side waste is 2.6 % of inflow, 18 % of lifts had some side waste since the previous
-  lift, and 13 % of lifts found the container at ≥ 99 % true fill.
+  lift, and 11 % of lifts found the container at ≥ 99 % true fill.
 * The fill ceiling differs slightly by material. Right after a stroke the pack is
   compressed by the springback and relaxes over about 3 h, so the reported true fill of a
   completely full container is about 100·(1 − 0.85·springback): ~96.6 % cardboard,
