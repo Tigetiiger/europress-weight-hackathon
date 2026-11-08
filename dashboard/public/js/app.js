@@ -28,6 +28,14 @@ const STATUS_STATE = { good: "good", review: "warn", action: "bad" };
 const EFFORT_STATE = { low: "good", medium: "warn", high: "info" };
 const state = { mv: { machines: "mixed" }, index: null, customer: null, route: "overview", ws: "customer", cache: new Map() };
 
+// Mobile navigation drawer: sidebar slides over the page with a tappable backdrop.
+function setNav(open) {
+  el("sidebar").classList.toggle("open", open);
+  el("navScrim").classList.toggle("show", open);
+  el("menuBtn").setAttribute("aria-expanded", String(open));
+  document.body.classList.toggle("nav-locked", open);
+}
+
 function wsOf(view) {
   if (view.startsWith("ep-")) return "europress";
   if (view === "operators") return "partners";
@@ -327,7 +335,7 @@ async function route(opts) {
   el("pageTitle").textContent = t(NAV_KEY[view]);
   el("pageEyebrow").textContent = "";
   el("pageEyebrow").hidden = true;
-  el("sidebar").classList.remove("open");
+  setNav(false);
   toggleMenu(false);
   if (!keepScroll) window.scrollTo({ top: 0 });
   el("wsLabel").textContent = t(`ws.${state.ws}`);
@@ -409,8 +417,11 @@ function bindGlobal() {
   document.querySelectorAll(".seg button[data-lang]").forEach((b) => b.addEventListener("click", () => { setLang(b.dataset.lang); rerenderAll(); }));
   document.querySelectorAll("[data-close]").forEach((b) => b.addEventListener("click", closePanels));
   el("scrim").addEventListener("click", closePanels);
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closePanels(); toggleMenu(false); } });
-  el("menuBtn").addEventListener("click", (e) => { e.stopPropagation(); el("sidebar").classList.toggle("open"); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closePanels(); toggleMenu(false); setNav(false); } });
+  el("menuBtn").addEventListener("click", (e) => { e.stopPropagation(); setNav(!el("sidebar").classList.contains("open")); });
+  el("navClose").addEventListener("click", () => setNav(false));
+  el("navScrim").addEventListener("click", () => setNav(false));
+  document.querySelectorAll("#sidebar .navitem, #sidebar .brand").forEach((a) => a.addEventListener("click", () => setNav(false)));
   el("gauge").addEventListener("click", () => openTrace(state.customer.kpis.avg_fill, t("kpi.avg_fill"), "kpis.avg_fill"));
   window.addEventListener("hashchange", () => route());
   document.querySelectorAll(".ws button").forEach((b) => b.addEventListener("click", () => { location.hash = WS_HOME[b.dataset.ws]; }));

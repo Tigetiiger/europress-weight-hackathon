@@ -16,6 +16,7 @@
 <body>
 <div class="app">
   <aside class="sidebar" id="sidebar">
+    <button class="icon-btn nav-close" id="navClose" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <a class="brand" href="/" title="SMART Weight home"><img src="/img/europress-smart-logo.svg" alt="Europress SMART" width="96" height="62"></a>
     <nav class="nav" aria-label="Main" data-ws-nav="customer">
       <a class="navitem" href="#overview"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg><span data-i18n="nav.overview"></span></a>
@@ -39,10 +40,11 @@
     </nav>
     <p class="sidebar-foot" data-i18n="top.synthetic"></p>
   </aside>
+  <div class="nav-scrim" id="navScrim" aria-hidden="true"></div>
 
   <main class="main">
     <header class="topbar">
-      <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Menu" aria-controls="sidebar" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
       <div class="page-title"><p class="eyebrow" id="pageEyebrow"></p><h1 id="pageTitle"></h1></div>
       <div class="top-actions">
         <div class="view-switch" id="viewSwitch">

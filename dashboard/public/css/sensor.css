@@ -79,3 +79,18 @@
     .ss-field input { width: 100%; }
   }
 }
+
+/* replay clock: keep the speed toggle inside the card at every width */
+@layer views {
+  .ss-clock-ctl .seg button { white-space: nowrap; padding: 0 var(--s-2); }
+  @media (max-width: 1180px) {
+    .ss-clock { grid-template-columns: minmax(0, 1fr); }
+    .ss-clock-ctl { justify-content: flex-start; }
+  }
+  @media (max-width: 520px) {
+    .ss-clock-ctl { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; }
+    .ss-clock-ctl .btn { min-width: 0; }
+    .ss-clock-ctl .seg { grid-column: 1 / -1; }
+    .ss-clock-ctl .seg button { flex: 1 1 0; min-width: 0; }
+  }
+}

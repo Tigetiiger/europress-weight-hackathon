@@ -852,3 +852,28 @@
     .save-list li { gap: var(--s-1) var(--s-4); }
   }
 }
+
+/* ===== Mobile: nav drawer backdrop, compact non-sticky header ===== */
+@layer utilities {
+  .nav-close, .nav-scrim { display: none; }
+  @media (max-width: 860px) {
+    .sidebar { z-index: 46; }
+    .nav-scrim { display: block; position: fixed; inset: 0; z-index: 45; background: var(--scrim); opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .nav-scrim.show { opacity: 1; pointer-events: auto; }
+    .sidebar { width: min(280px, 84vw); }
+    .sidebar:not(.open) { visibility: hidden; transition: transform .2s, visibility 0s .2s; }
+    .sidebar.open { visibility: visible; transition: transform .2s; }
+    .nav-close { display: inline-grid; position: absolute; top: var(--s-3); right: var(--s-3); }
+    body.nav-locked { overflow: hidden; }
+    /* the two-row header would cover ~150px of a phone screen if it stayed pinned */
+    .topbar { position: static; gap: var(--s-3); padding-bottom: var(--s-3); }
+    .page-title h1 { font-size: 22px; line-height: 1.15; }
+    .top-actions { flex-wrap: wrap; row-gap: var(--s-2); }
+    .top-actions > * { flex: 0 0 auto; }
+    .top-actions .view-switch { flex: 1 1 0; min-width: 0; }
+    .top-actions .view-switch .vs-btn { width: 100%; min-width: 0; padding: 0 var(--s-2); justify-content: space-between; }
+    .top-actions .view-switch .vs-btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .top-actions .seg button { min-width: 36px; padding: 0 6px; }
+    .account { flex: 1 1 100%; order: -1; }
+  }
+}
