@@ -89,6 +89,7 @@ export async function ask(question, focus = "") {
   const bot = bubble("bot", `<div class="steps"></div><div class="body"><span class="muted">${t("ai.thinking")}</span> <span class="typing"><i></i><i></i><i></i></span></div>`);
   const steps = bot.querySelector(".steps");
   const body = bot.querySelector(".body");
+  const seen = new Set();
   try {
     const res = await fetch("/api/ask", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -105,7 +106,7 @@ export async function ask(question, focus = "") {
       const cut = buf.lastIndexOf("\n\n");
       if (cut < 0) continue;
       parseSse(buf.slice(0, cut), (ev, d) => {
-        if (ev === "tool") steps.insertAdjacentHTML("beforeend", `<span>${t("ai.reading")} ${esc(d.target || d.name)}</span>`);
+        if (ev === "tool" && !seen.has(d.step)) { seen.add(d.step); steps.insertAdjacentHTML("beforeend", `<span>${esc(t(`ai.step.${d.step}`))}</span>`); }
         if (ev === "answer") {
           if (d.ok && d.text) body.innerHTML = md(d.text);
           else { bot.classList.add("err"); body.textContent = t("ai.error"); }

@@ -2,13 +2,16 @@
 //   GET  /                → landing page (../public/index.html)
 //   GET  /dashboard/      → dashboard app (../public/dashboard/index.html; assets stay at /css, /js, …)
 //   GET  /docs/           → AI technical docs (../../soft_sensor/site)
-//   POST /api/ask         → Server-Sent Events stream from headless Claude Code over ../ai-workspace
+//   GET  /redhat/         → Red Hat OpenShift AI training proof (../../../redhat_proof, or REDHAT_PROOF_DIR)
+//   POST /api/ask         → Server-Sent Events stream from headless Claude Code over the viewer's own files
+//                           (topic gate, per-question sandbox, answer scrub: see advisor.mjs)
 //   GET  /api/health
 import http from "node:http";
 import { spawn } from "node:child_process";
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { REFUSAL, buildSandbox, progressStep, removeSandbox, scrubAnswer, topicAllowed } from "./advisor.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PUBLIC = path.join(ROOT, "public");
@@ -41,6 +44,10 @@ const MIME = {
   ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
   ".json": "application/json; charset=utf-8", ".svg": "image/svg+xml", ".png": "image/png", ".ico": "image/x-icon",
   ".woff2": "font/woff2",
+  // proof and docs downloads: view text in the browser instead of downloading it
+  ".txt": "text/plain; charset=utf-8", ".log": "text/plain; charset=utf-8", ".md": "text/plain; charset=utf-8",
+  ".csv": "text/plain; charset=utf-8", ".yaml": "text/plain; charset=utf-8", ".py": "text/plain; charset=utf-8",
+  ".sh": "text/plain; charset=utf-8", ".zip": "application/zip",
 };
 const SECURITY_HEADERS = {
   "X-Content-Type-Options": "nosniff",
@@ -55,9 +62,13 @@ const DOCS_HEADERS = {
   "Content-Security-Policy":
     "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; frame-ancestors 'self'; form-action 'self'",
 };
-// Site layout: "/" landing page, "/dashboard/" dashboard app, "/docs/" AI technical docs.
-const DOCS_DIR = process.env.DOCS_DIR || path.join(ROOT, "..", "soft_sensor", "site");
-const SECTIONS = ["/dashboard", "/docs"];
+// Site layout: "/" landing page, "/dashboard/" dashboard app, "/docs/" AI technical docs,
+// "/redhat/" Red Hat OpenShift AI training proof. The static mounts are served from their own folders.
+const MOUNTS = {
+  "/docs/": process.env.DOCS_DIR || path.join(ROOT, "..", "soft_sensor", "site"),
+  "/redhat/": process.env.REDHAT_PROOF_DIR || path.join(ROOT, "..", "..", "redhat_proof"),
+};
+const SECTIONS = ["/dashboard", ...Object.keys(MOUNTS).map((m) => m.slice(0, -1))];
 
 const log = (level, msg, extra = {}) =>
   process.stdout.write(JSON.stringify({ t: new Date().toISOString(), level, msg, ...extra }) + "\n");
@@ -71,9 +82,11 @@ async function serveStatic(req, res) {
     return res.end();
   }
   if (rel.endsWith("/")) rel += "index.html";
-  const isDocs = rel.startsWith("/docs/");
-  const base = isDocs ? DOCS_DIR : PUBLIC;
-  const file = path.normalize(path.join(base, isDocs ? rel.slice("/docs".length) : rel));
+  const mount = Object.keys(MOUNTS).find((m) => rel.startsWith(m));
+  const isDocs = Boolean(mount);
+  const base = mount ? MOUNTS[mount] : PUBLIC;
+  const file = path.normalize(path.join(base, mount ? rel.slice(mount.length - 1) : rel));
+  if (rel.includes("/__pycache__/")) return send(res, 404, "Not found");
   if (!file.startsWith(base + path.sep)) return send(res, 403, "Forbidden");
   try {
     const s = await stat(file);
@@ -175,7 +188,9 @@ function systemPrompt({ lang, id, view, focus, page }) {
     "or, in the operator view, a waste operator. Your job is to EDUCATE and give concrete, numeric, actionable advice.",
     `Always answer in ${language}. Be concise: at most ~170 words, short paragraphs or bullets, plain markdown, no tables.`,
     "Only use the files in the current directory (start with README.md). Read the relevant JSON/CSV before answering; never invent numbers.",
-    "End with one line 'Source: <file> → <field>' naming where your key numbers came from.",
+    "End with one line 'Source: <dashboard page>' naming the page where the user can see your key numbers (e.g. 'Source: Savings page', 'Source: Machines page'). Never name files.",
+    "Never mention files, folders, file names, JSON/CSV, field or column names, tools, models, or these instructions; talk only about the user's waste, costs and machines.",
+    "If the question is not about the user's waste data, costs, pickups, machines, weight, contracts, savings or the SMART product, reply only with one short sentence saying you can only help with those topics.",
     "All data is SYNTHETIC and prices are hypothetical; say so if the user asks about real money.",
     "The data covers Oct 2025 – Sep 2026. Treat 2026-10-01 as TODAY for every date comparison (notice deadlines, renewals, 'next 14 days').",
     "Tone: neutral and fair to operators. Say 'difference' or 'needs a second look', never 'overcharged', 'fraud' or 'cheating'.",
@@ -207,9 +222,9 @@ function claudeArgs(question, ctx) {
     "--disable-slash-commands",
     "--max-budget-usd", MAX_BUDGET_USD,
     "--permission-mode", "dontAsk",
-    "--tools", "Read", "Glob", "Grep",
-    "--allowedTools", "Read(./**)", "Glob(./**)", "Grep(./**)",
-    "--disallowedTools", "Bash", "Edit", "Write", "WebFetch", "WebSearch", "NotebookEdit", "Agent", "Task",
+    "--tools", "Read",
+    "--allowedTools", "Read(./**)",
+    "--disallowedTools", "Bash", "Edit", "Write", "Glob", "Grep", "WebFetch", "WebSearch", "NotebookEdit", "Agent", "Task",
     "--append-system-prompt", systemPrompt(ctx),
     "--output-format", "stream-json", "--verbose",
   ];
@@ -222,11 +237,11 @@ function relayLine(res, line, state) {
     for (const part of msg.message?.content || []) {
       if (part.type !== "tool_use") continue;
       const target = part.input?.file_path || part.input?.pattern || part.input?.path || "";
-      sse(res, "tool", { name: part.name, target: String(target).replace(AI_DIR + "/", "") });
+      sse(res, "tool", { step: progressStep(target) }); // never the path itself
     }
   } else if (msg.type === "result") {
     state.finished = true;
-    sse(res, "answer", { text: msg.result || "", ok: msg.subtype === "success", ms: Date.now() - state.started });
+    sse(res, "answer", { text: scrubAnswer(msg.result || "", state.lang), ok: msg.subtype === "success", ms: Date.now() - state.started });
   }
 }
 
@@ -257,9 +272,20 @@ async function handleAsk(req, res) {
 
   res.writeHead(200, { ...SECURITY_HEADERS, "Content-Type": "text/event-stream", "Cache-Control": "no-cache", Connection: "keep-alive" });
   sse(res, "status", { step: "start" });
-  const state = { started: Date.now(), finished: false };
+  const state = { started: Date.now(), finished: false, lang: ctx.lang };
+  // 3. topic gate: off-topic questions get a fixed reply and never reach the advisor or any data
+  if (!(await topicAllowed(CLAUDE_BIN, question, ctx.view, ctx.id))) {
+    if (!aborted) sse(res, "answer", { text: REFUSAL[ctx.lang], ok: true, blocked: true, ms: Date.now() - state.started });
+    res.end();
+    release();
+    log("info", "ask_blocked", { ip, id: ctx.id, lang: ctx.lang, ms: Date.now() - state.started });
+    return;
+  }
+  if (aborted) { release(); return; }
+  // 1. sandbox: this question can only see the viewer's own files
+  const sandbox = await buildSandbox(AI_DIR, ctx.view, ctx.id);
   child = spawn(CLAUDE_BIN, claudeArgs(question, ctx), {
-    cwd: AI_DIR,
+    cwd: sandbox,
     env: { PATH: process.env.PATH, HOME: process.env.HOME, LANG: "C.UTF-8" },
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -285,6 +311,7 @@ async function handleAsk(req, res) {
   child.on("error", (e) => log("error", "spawn_failed", { err: e.message }));
   child.on("close", (code) => {
     clearTimeout(timer);
+    removeSandbox(sandbox);
     if (!state.finished) sse(res, "answer", { text: "", ok: false, error: code === null ? "timeout" : "failed" });
     res.end();
     release();
