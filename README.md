@@ -22,8 +22,8 @@ scripts/start.sh        # soft-sensor API + web server on http://localhost:8080
 | `/docs/` | AI technical documentation |
 | `/redhat/` | Red Hat OpenShift AI training proof, if the separate `redhat_proof` folder sits next to this repo (or set `REDHAT_PROOF_DIR`) |
 
-`build_data.sh` options (env): `BINS`, `DAYS`, `SEED`, `PYTHON`, `VENV`, `SKIP_TRAIN=1` (reuse an existing
-`models/full400`). `start.sh` options: `PORT`, `HOST`, `SOFTSENSOR_PORT`, `VENV`.
+`build_data.sh` options (env): `BINS`, `DAYS`, `SEED`, `PYTHON`, `VENV`, and `SKIP_TRAIN=1` to reuse an existing `soft_sensor/models/full400` (copied from another machine) instead of retraining. `start.sh` options: `PORT`, `HOST`,
+`SOFTSENSOR_PORT`, `VENV`.
 
 ## Layout
 
