@@ -1,6 +1,6 @@
 # Hydraulic weight soft sensor — dashboard integration
 
-**All data is synthetic** (physics-based simulator, `/home/hackathon/simulator-weather-and-stuff`).
+**All data is synthetic** (physics-based simulator, `soft_sensor/compactor_sim`).
 Nothing here is real Europress data or real Europress pressure settings.
 
 The soft sensor estimates the **mass of waste (kg) inside a compactor every hour**, with a calibrated
@@ -31,28 +31,29 @@ simulator telemetry (runs/full400)      trained bundle (models/full400/time)
 - **Machine page.** Runs the model live for that hour, on the machine's telemetry since its last
   emptying plus 9 days of weather history (≈120 ms). It shows the batch value next to it: they are
   identical (verified on 60 random machine-hours, max difference 0.0 kg).
-- **Simulator truth** (`true_mass_kg`) and the weighbridge ticket are shown only as evaluation, and
-  are labelled as such. Telemetry passes `weight_train`'s column whitelist and leakage guard. Hidden
+- **No simulator truth** reaches the dashboard: accuracy is shown against weighbridge tickets only. Telemetry passes `weight_train`'s column whitelist and leakage guard. Hidden
   machine parameters from `bins.parquet` are never loaded.
 
 ## Run
 
+Easiest: `scripts/build_data.sh` once, then `scripts/start.sh` (both at the repo root) start this API
+together with the web server. By hand, from `dashboard/`:
+
 ```bash
-cd /home/hackathon/europress-dashboard
 # 1. static data for Weighbridge check / Model / How it works (~10 s)
-/home/hackathon/simulator-weather-and-stuff/.venv/bin/python pipeline/softsensor_data.py
-# 2. model API (~12 s to load, ~1.8 GB RAM)
-/home/hackathon/simulator-weather-and-stuff/.venv/bin/python -m softsensor
-#    or as a service:
+../.venv/bin/python pipeline/softsensor_data.py
+# 2. model API (~15 s to load, ~1.8 GB RAM); reads ../soft_sensor/runs/replay400 + models/full400
+../.venv/bin/python -m softsensor
+#    or as a service (edit the absolute paths in the unit first):
 cp deploy/europress-softsensor.service ~/.config/systemd/user/
 systemctl --user daemon-reload && systemctl --user enable --now europress-softsensor
-# 3. tests (25-machine dev run, ~6 s)
-/home/hackathon/simulator-weather-and-stuff/.venv/bin/python -m pytest softsensor -q
+# 3. tests (~15 s)
+../.venv/bin/python -m pytest softsensor -q
 ```
 
-Settings (env): `SOFTSENSOR_SIM_ROOT`, `SOFTSENSOR_RUN` (default `full400`), `SOFTSENSOR_MODELS`
-(`full400`), `SOFTSENSOR_SPLIT` (`time`), `SOFTSENSOR_HOST`/`SOFTSENSOR_PORT` (`127.0.0.1:8093`).
-Node: `SENSOR_URL`, `SENSOR_RATE_MAX`.
+Settings (env): `SOFTSENSOR_SIM_ROOT` (default `../soft_sensor`), `SOFTSENSOR_RUN` (default `replay400`:
+all 400 machines, test period + 40-day lookback), `SOFTSENSOR_MODELS` (`full400`), `SOFTSENSOR_SPLIT`
+(`time`), `SOFTSENSOR_HOST`/`SOFTSENSOR_PORT` (`127.0.0.1:8093`). Node: `SENSOR_URL`, `SENSOR_RATE_MAX`.
 
 ## API (all responses `{success, data, error}`)
 
