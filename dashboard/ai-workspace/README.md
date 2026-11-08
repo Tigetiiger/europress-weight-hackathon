@@ -26,10 +26,13 @@ Prices are hypothetical. Europress is not a party to the customer–operator con
   - `operators[]` per operator: on_time_rate, missed_visit_rate, weighbridge_shared_rate, order_to_lift_h, wasted_trips,
     next_renewal, notice_by (last day to give notice before the 3-year contract renews).
   - `weight`: how many lifts have weight verified by a weighbridge ticket within 10 %, differ >10 %, or device-only.
-  - `quality_grades`: A–D contamination grades from the treatment plant. `insights[]`: rule-based alerts.
+  - `load_acceptance`: loads accepted vs rejected at the plant (see below). `insights[]`: rule-based alerts.
 - `data/lifts/<ORG-id>.csv` — every collection event (lift) with fill % before, estimated kg, trigger, status.
 - `data/lifts/<ORG-id>_invoice_summary.csv` — invoice amounts per month × device × line type.
 - `data/operators/<OP-id>.json` — operator view: 14-day pickup forecast, early-lift share, renewals in the next 12 months.
+- `data/softsensor/evaluation.json`, `check.json`, `explainer.json` — the hydraulic weight soft sensor (simulator data, separate machines `BIN-…`):
+  test accuracy per split (`splits.time` = known machines, `splits.bins` = machines it never saw), the per-emptying check, and how the model works.
+  `check.json` compares estimates with weighbridge tickets — Europress-internal; the weight rule above still applies.
 - `FAQ.md` — product facts from the Europress briefing.
 
 ## How to compute common answers
@@ -37,7 +40,7 @@ Prices are hypothetical. Europress is not a party to the customer–operator con
 - Mixed-waste trend: compare the first and last 6 values of `monthly.mixed_share`.
 - Cheapest action first: `levers` are sorted by `saving_eur`; `effort` is low/medium/high.
 - `data/fleet.json` — Europress internal view (all customers): `kpis` (devices, tonnes, spend, savings_pool, fee_pool = 25 % of customers' predicted savings, avg_fill), `pipeline[]` (customers ranked by savings, SMART fee = 25 % of savings, `keeps` = what the customer keeps), `maintenance` (work orders by type, downtime, overflow risk, data completeness), `data_products` (internal material flow by region × stream, cells with < 5 customers hidden; plant acceptance by stream; recovered-material price index — internal only, never sold).
-- `data/operators/<OP-id>.json` → `extras`: monthly inbound tonnes by region × stream (last 3 months), quality grades, quality hotspots (customers with most C/rejected loads).
+- `data/operators/<OP-id>.json` → `extras`: average monthly inbound tonnes by region × stream (last 3 months), accepted/rejected loads by stream (`quality_by_stream`), quality hotspots (customers with the highest share of rejected loads).
 - `machines_now[]` (in each customer JSON): live state + truck scheduling per machine — `fill_now` (capped at the 85 % pickup line; raw in `fill_sensor_pct`), `policy` (ON_CALL = SMART orders the truck; FIXED_SCHEDULE = operator timetable in `schedule_weekdays` 0=Mon and `schedule_per_week`), `order_threshold_pct` (the machine's SMART order setting), `operator`, `operator_on_time_pct`, `lead_h` (typical hours from order to truck), `order_on`, `truck_on`, `visit_fill_pct` (expected fill when the truck arrives), `pickup_reason` (fill / interval / schedule / ordered). Status date = `as_of`. Forecast and weight are demo estimates.
 - `time_patterns` (customer JSON): when the work happens — `heat[weekday 0=Mon][hour]` compaction cycles (people throwing waste in, local Finnish time), `fill_by_weekday`, `fill_by_hour`, `pickups_by_weekday`, `pickups_by_hour`, `gain_per_day_by_month` (fill % gained per machine-day), `cycles_per_day_by_month`, `season` (winter Dec–Feb vs summer Jun–Aug), `busiest_weekday`, `peak_hours`, `pickup_weekday`. `monthly.pickups` and `monthly.fill_at_emptying` per month. `trend_findings[]`: last 3 vs first 3 months (mixed, eurt, fill, pickups, recycling) and patterns (weekday, hours, season, pickupday).
 - `answers[]` (customer JSON): ready-made answers to the customer's question framework — ids fleet, contract, recycling, co2, safety; each with `status` and numbers `p`. Lead with these.

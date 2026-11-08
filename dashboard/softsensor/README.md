@@ -5,13 +5,13 @@ Nothing here is real Europress data or real Europress pressure settings.
 
 The soft sensor estimates the **mass of waste (kg) inside a compactor every hour**, with a calibrated
 p10–p90 band. It uses only signals the machine already has: fill estimate from back pressure, presses,
-peak ram pressure, the 16-point pressure graph, oil temperature, plus public weather. The dashboard
-shows it under **Europress → Weight soft sensor** (`#ep-sensor`).
+peak ram pressure, the 16-point pressure graph, plus public weather (air temperature, rain, humidity; no
+oil-temperature sensor is assumed). The dashboard shows it under **Europress → Weight soft sensor** (`#ep-sensor`).
 
 ## Architecture
 
 ```
-simulator telemetry (runs/full400)      trained bundle (models/full400/time)
+simulator telemetry (runs/replay400)    trained bundle (models/full400/time)
               │                                   │
               ▼                                   ▼
   softsensor/  Python API 127.0.0.1:8093  ── weight_train (same feature code as training)
@@ -53,7 +53,7 @@ systemctl --user daemon-reload && systemctl --user enable --now europress-softse
 
 Settings (env): `SOFTSENSOR_SIM_ROOT` (default `../soft_sensor`), `SOFTSENSOR_RUN` (default `replay400`:
 all 400 machines, test period + 40-day lookback), `SOFTSENSOR_MODELS` (`full400`), `SOFTSENSOR_SPLIT`
-(`time`), `SOFTSENSOR_HOST`/`SOFTSENSOR_PORT` (`127.0.0.1:8093`). Node: `SENSOR_URL`, `SENSOR_RATE_MAX`.
+(`time`), `SOFTSENSOR_HOST`/`SOFTSENSOR_PORT` (`127.0.0.1:8093`). Node: `SENSOR_URL`, `SENSOR_RATE_MAX`, `SENSOR_MAX_IN_FLIGHT`.
 
 ## API (all responses `{success, data, error}`)
 
@@ -61,14 +61,14 @@ all 400 machines, test period + 40-day lookback), `SOFTSENSOR_MODELS` (`full400`
 |---|---|
 | `/health` | `{ok, machines}` |
 | `/meta` | replay window, model info, thresholds, public machine attributes |
-| `/fleet?at=ISO` | per machine: fill, hours since emptying, `mass_kg`, `p10_kg`, `p90_kg`, `kg_m3`, `truth_kg`; totals; evaluation vs truth |
-| `/machines/BIN-nnnn?at=ISO&hours=24…2880` | `live` (model run now, inputs, latency), `batch`, `truth_kg`, hourly `series` up to `at`, emptyings with estimate 1 h before vs weighbridge |
+| `/fleet?at=ISO` | per machine: fill, hours since emptying, `mass_kg`, `p10_kg`, `p90_kg`, `kg_m3`; totals (`mass_t`, `ready_to_empty`, `heavy`, `mean_fill_pct`) |
+| `/machines/BIN-nnnn?at=ISO&hours=24…2880` | `live` (model run now, inputs, latency), `batch`, `now` (fill, hours since emptying), hourly `series` up to `at`, `lifts`: emptyings with estimate 1 h before vs weighbridge |
 
-`at` is floored to the hour and must lie inside the replay window. The API never returns data after `at`.
+`at` is floored to the hour and must lie inside the replay window (omitted = window start); `hours` defaults to 336 and is clamped to 24…2880. The API never returns data after `at`.
 
 ## Caveats (also shown in the UI)
 
-- Mixed-waste intervals on unseen machines are under-calibrated (31 % instead of 80 % coverage).
+- Mixed-waste intervals on unseen machines are under-calibrated (33 % instead of 80 % coverage).
 - 34 of ~20,300 simulated emptyings (mixed waste, 20 m³ DUO) exceed the ~10 t truck limit (simulator fix pending).
 - A machine's first, incomplete cycle in the data is less accurate.
 - Estimates are not legal-for-trade weighings.

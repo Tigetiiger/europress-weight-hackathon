@@ -10,15 +10,21 @@ Results, tables and plots for a trained run are in `models/<run>/REPORT.md`.
 
 ## Run
 
+From `soft_sensor/`, after simulating a run (`python -m compactor_sim ... --out runs/full400`, see
+[`../README.md`](../README.md)):
+
 ```bash
 .venv/bin/pip install -r requirements.txt
 
 # train + evaluate both splits, write models/<run>/ (incl. plots + REPORT.md)
-.venv/bin/python -m weight_train train --data runs/full400 --out models/full400 [--split bins|time|both] [--setup per_material|shared|both] [--seed 7]
+.venv/bin/python -m weight_train train --data runs/full400 --out models/full400 [--split bins|time|both] [--setup per_material|shared|both] [--seed 7] [--no-report]
 .venv/bin/python -m weight_train train --data runs/bins25  --out models/bins25
 
 # predict hourly mass + p10/p90 (input needs no true_ columns; strokes.parquet next to it is used if present)
-.venv/bin/python -m weight_train predict --models models/full400 --input runs/full400/hourly.parquet --output predictions.parquet [--split time|bins]
+.venv/bin/python -m weight_train predict --models models/full400 --input runs/full400/hourly.parquet --output predictions.parquet [--split time|bins] [--strokes path/strokes.parquet]
+
+# one material: error vs number of training machines (needs a trained models/<run> with its bins bundle)
+.venv/bin/python -m weight_train curve --data runs/full400 --models models/full400 [--material cardboard] [--sizes 1,2,4,...]
 
 # rebuild plots and REPORT.md
 .venv/bin/python -m weight_train report --models models/full400
@@ -27,7 +33,9 @@ Results, tables and plots for a trained run are in `models/<run>/REPORT.md`.
 ```
 `predict` writes `bin_id, ts, material, mass_pred_kg, mass_p10_kg, mass_p90_kg` and prints
 wall time, peak memory and µs per machine-hour. It uses the `time` (pilot-fleet) bundle
-by default. The `bins` bundle is the one validated on unseen machines.
+by default (falling back to `bins` if no `time` bundle exists). The `bins` bundle is the one
+validated on unseen machines. Defaults: `--split both`, `--setup both`, `--seed 7`; training on
+`runs/full400` takes ~15 min and ~4.5 GB RAM (see Compute in REPORT.md).
 
 ## Method
 
@@ -49,7 +57,8 @@ by default. The `bins` bundle is the one validated on unseen machines.
     score = max(p10 − y, y − p90) / width. Its finite-sample 80 % quantile Q widens the band
     to [p10 − Q·w, p90 + Q·w].
   * Calibration is Mondrian by material × fill bucket (<50, 50–80, ≥80 %), falling back to the
-    material and then the pool when a cell has fewer than 30 points.
+    material and then the pool when a cell has fewer than 30 points. In the ≥80 % bucket Q is the larger
+    of the all-hours and the pre-lift-hours quantile, so the weighbridge comparison hour is covered too.
 * **Splits** (both reported):
   * `bins`, the new-installation case: 25 % of machines, stratified by material, are tested on
     the last 25 % of the period. Validation and calibration use *other* held-out machines.
@@ -124,7 +133,8 @@ independent, geometric view of the fill level.
 `learning_curve.csv` · `feature_list.json` · `plots/*.png` · `REPORT.md` ·
 `<split>/bundle.json` + LightGBM text models (`<setup>__<material|all>__<point|q_lo|q_hi>.txt`) ·
 `<split>/test_predictions.parquet` · `<split>/shap_<material>.parquet` (exact TreeSHAP from
-LightGBM `pred_contrib`, so the `shap` package is not needed) · `predict_stats.json`.
+LightGBM `pred_contrib`, so the `shap` package is not needed) · `predict_stats.json` ·
+`material_curve_<material>.{csv,json}` (from `curve`).
 
 ## Compute
 
