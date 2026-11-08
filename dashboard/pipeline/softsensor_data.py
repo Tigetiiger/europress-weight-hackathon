@@ -1,6 +1,6 @@
 """Static data for the soft-sensor pages (evaluation, weighbridge check, explainer).
 
-    /home/hackathon/simulator-weather-and-stuff/.venv/bin/python pipeline/softsensor_data.py
+    ../.venv/bin/python pipeline/softsensor_data.py      (from dashboard/, after scripts/build_data.sh)
 
 Reads the simulator run + trained model artefacts (read-only) and writes
 public/data/softsensor/{evaluation,check,explainer}.json and copies validation plots to
@@ -24,14 +24,16 @@ OUT_DATA = ROOT / "public" / "data" / "softsensor"
 OUT_IMG = ROOT / "public" / "img" / "softsensor"
 SPLITS = ("time", "bins")
 MATERIALS = ("cardboard", "paper", "plastic_film", "mixed_waste")
-LADDER = ("naive_fill_x_density", "fill_presses", "pressure", "pressure_graph", "full_shared",
-          "full_per_material", "full_selected")
-METRIC_KEYS = ("n", "mae_kg", "mean_pct", "median_pct", "within_5pct", "within_10pct", "bias_kg", "bias_pct",
-               "coverage", "width_kg")
+# The dashboard shows only what could be measured in reality: every accuracy figure is the estimate one hour
+# before an emptying vs the operator's weighbridge ticket. Simulator truth (true mass, false-full cycles,
+# hourly error) stays in the technical docs (soft_sensor/site) and never reaches the dashboard.
+CHECK_COLUMNS = ["bin_id", "t", "material", "volume_m3", "pred_kg", "p10_kg", "p90_kg", "weighbridge_kg", "trigger"]
 TOP_FEATURES = 15
 CURVE_FILL_BANDS = ((15, 25), (35, 45), (55, 65), (75, 85), (90, 100))
 CURVE_MACHINE = "BIN-0001"
-SIM_PLOTS = ("pressure_graph.png", "pressure_vs_fill.png", "lifts.png", "temperature.png", "weather_effect.png")
+# Simulator validation plots are drawn from simulator truth (true mass, density, moisture) or from signals real
+# machines do not have (oil temperature): technical docs only, never on the dashboard.
+SIM_PLOTS: tuple[str, ...] = ()
 MODEL_PLOTS = ("shap_time.png",)
 NOTICE = ("Synthetic data from a physics-based simulator. Nothing here represents real Europress data "
           "or real Europress pressure settings.")
@@ -51,8 +53,19 @@ def _clean(v):
     return v
 
 
-def _metrics(d: dict | None) -> dict | None:
-    return None if d is None else {k: d.get(k) for k in METRIC_KEYS if k in d}
+def ticket_metrics(df: pd.DataFrame) -> dict | None:
+    """Estimate 1 h before emptying vs weighbridge ticket (what a customer can check in reality)."""
+    df = df[df["weighbridge_kg"] > 0]
+    if df.empty:
+        return None
+    diff = df["pred_kg"] - df["weighbridge_kg"]
+    rel = diff.abs() / df["weighbridge_kg"]
+    inside = (df["weighbridge_kg"] >= df["p10_kg"]) & (df["weighbridge_kg"] <= df["p90_kg"])
+    return {"n": int(len(df)), "mae_kg": float(diff.abs().mean()), "mean_pct": float(rel.mean() * 100),
+            "median_pct": float(rel.median() * 100), "within_5pct": float((rel <= 0.05).mean()),
+            "within_10pct": float((rel <= 0.10).mean()), "bias_kg": float(diff.mean()),
+            "bias_pct": float(diff.sum() / df["weighbridge_kg"].sum() * 100), "coverage": float(inside.mean()),
+            "width_kg": float((df["p90_kg"] - df["p10_kg"]).mean())}
 
 
 def _write(name: str, payload: dict) -> None:
@@ -86,42 +99,33 @@ def _shap(bundle_dir: Path) -> dict:
     return out
 
 
-def evaluation(model_dir: Path) -> dict:
+def evaluation(model_dir: Path, chk: dict) -> dict:
     metrics = json.loads((model_dir / "metrics.json").read_text())
-    comparison = pd.read_csv(model_dir / "comparison.csv")
     splits = {}
     for split in SPLITS:
         s = metrics["splits"].get(split)
-        if s is None:
+        if s is None or split not in chk["splits"]:
             continue
-        ladder = comparison[comparison["split"] == split]
+        lifts = pd.DataFrame(chk["splits"][split]["rows"], columns=chk["splits"][split]["columns"])
         splits[split] = {
             "description": s["description"], "test_start": s["test_start"],
             "n_train_machines": s["n_train_machines"], "n_test_machines": s["n_test_machines"],
             "rows": s["rows"], "selection": s["selection"],
-            "lift": {"overall": _metrics(s["final"]["lift"]["overall"]),
-                     "by_material": {m: _metrics(v) for m, v in s["final"]["lift"]["by_material"].items()}},
-            "hourly": {"overall": _metrics(s["final"]["hourly"]["overall"]),
-                       "by_material": {m: _metrics(v) for m, v in s["final"]["hourly"]["by_material"].items()}},
-            "ladder": {step: {r["material"]: {"mean_pct": r["mean_pct"], "within_5pct": r["within_5pct"]}
-                              for _, r in ladder[ladder["step"] == step].iterrows()} for step in LADDER},
-            "breakdowns": {k: {g: _metrics(v) for g, v in groups.items()} for k, groups in s["breakdowns"].items()},
+            "lift": {"overall": ticket_metrics(lifts),
+                     "by_material": {m: ticket_metrics(g) for m, g in lifts.groupby("material")}},
             "importance": _importance(s["feature_importance_gain"]),
             "shap": _shap(model_dir / split),
         }
-    curve = pd.read_csv(model_dir / "learning_curve.csv")
-    learning = {m: [[int(r["n_machines"]), r["mean_pct"]] for _, r in curve[curve["material"] == m].iterrows()]
-                for m in ("all", *MATERIALS)}
     predict_stats_path = model_dir / "predict_stats.json"
     predict_stats = json.loads(predict_stats_path.read_text()) if predict_stats_path.is_file() else {}
-    return {"notice": NOTICE, "splits": splits, "learning_curve": learning,
-            "learning_curve_split": "bins", "target_coverage": metrics["settings"]["target_coverage"],
+    return {"notice": NOTICE, "reference": "weighbridge", "splits": splits,
+            "target_coverage": metrics["settings"]["target_coverage"],
             "compute": {**metrics["compute"], **{f"predict_{k}": v for k, v in predict_stats.items()}}}
 
 
 # ---------------------------------------------------------------- weighbridge check
 def check(run_dir: Path, model_dir: Path) -> dict:
-    """Every test-period emptying: estimate 1 h before vs the weighbridge ticket (and simulator truth)."""
+    """Every test-period emptying: estimate 1 h before vs the weighbridge ticket."""
     lifts = pd.read_parquet(run_dir / "lifts.parquet",
                             columns=["bin_id", "ts", "trigger", "weighbridge_net_kg", "container_volume_m3"])
     lifts["bin_id"] = lifts["bin_id"].astype(str)
@@ -130,8 +134,8 @@ def check(run_dir: Path, model_dir: Path) -> dict:
         path = model_dir / split / "test_predictions.parquet"
         if not path.is_file():
             continue
-        tp = pd.read_parquet(path, columns=["bin_id", "ts", "material", "is_lift", "y_kg", "pred_kg", "lo_kg",
-                                            "hi_kg", "false_full_in_cycle"])
+        tp = pd.read_parquet(path, columns=["bin_id", "ts", "material", "is_lift", "pred_kg", "lo_kg",
+                                            "hi_kg"])
         tp = tp[tp["is_lift"] == 1].copy()
         tp["bin_id"] = tp["bin_id"].astype(str)
         tp["lift_ts"] = tp["ts"] + pd.Timedelta(hours=1)        # is_lift marks the hour before the lift
@@ -141,11 +145,10 @@ def check(run_dir: Path, model_dir: Path) -> dict:
             log.warning("%s: %d of %d test lifts matched a weighbridge ticket", split, len(joined), len(tp))
         out["splits"][split] = {
             "n": int(len(joined)),
-            "columns": ["bin_id", "t", "material", "volume_m3", "pred_kg", "p10_kg", "p90_kg", "weighbridge_kg",
-                        "truth_kg", "trigger", "false_full"],
+            "columns": CHECK_COLUMNS,
             "rows": [[r.bin_id, int(r.lift_ts.value // 1_000_000), r.material, float(r.container_volume_m3),
                       round(float(r.pred_kg), 1), round(float(r.lo_kg), 1), round(float(r.hi_kg), 1),
-                      float(r.weighbridge_net_kg), round(float(r.y_kg), 1), r.trigger, bool(r.false_full_in_cycle)]
+                      float(r.weighbridge_net_kg), r.trigger]
                      for r in joined.itertuples(index=False)],
         }
     return out
@@ -177,6 +180,11 @@ def pressure_curves(run_dir: Path) -> list:
 def explainer(run_dir: Path, model_dir: Path) -> dict:
     summary = json.loads((run_dir / "summary.json").read_text())
     bins = pd.read_parquet(run_dir / "bins.parquet", columns=["material", "equipment_class", "region", "infeed"])
+    tickets = pd.read_parquet(run_dir / "lifts.parquet", columns=["bin_id", "weighbridge_net_kg"])
+    material_of = pd.read_parquet(run_dir / "bins.parquet", columns=["bin_id", "material"]).set_index("bin_id")["material"]
+    tickets["material"] = tickets["bin_id"].map(material_of)
+    ticket_mass = {m: {"mean": float(g["weighbridge_net_kg"].mean()), "count": int(len(g))}
+                   for m, g in tickets.groupby("material")}
     bundle = json.loads((model_dir / "time" / "bundle.json").read_text())
     features = json.loads((model_dir / "feature_list.json").read_text())
     full = features.get("feature_sets", {}).get("full", [])
@@ -184,8 +192,7 @@ def explainer(run_dir: Path, model_dir: Path) -> dict:
         "notice": NOTICE,
         "simulation": {"machines": summary["n_bins"], "days": summary["days"], "start": summary["start"],
                        "hourly_rows": summary["hourly_rows"], "lifts": summary["n_lifts"],
-                       "false_full_share": summary["false_full_lift_share"],
-                       "lift_mass_by_material": summary["lift_mass_by_material"],
+                       "lift_mass_by_material": ticket_mass,   # weighbridge tickets, not simulator truth
                        "fleet": {c: bins[c].value_counts().to_dict() for c in bins.columns}},
         "model": {"n_features": len(full), "features": full, "selection": bundle.get("selection", {}),
                   "n_models": len(bundle.get("models", {}))},
@@ -209,17 +216,21 @@ def copy_plots(run_dir: Path, model_dir: Path) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Build static soft-sensor data for the dashboard")
     parser.add_argument("--sim-root", type=Path, default=ROOT.parent / "soft_sensor")
-    parser.add_argument("--run", default="full400")
+    parser.add_argument("--run", default="full400", help="falls back to replay400 when the full run is absent")
     parser.add_argument("--models", default="full400")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     run_dir, model_dir = args.sim_root / "runs" / args.run, args.sim_root / "models" / args.models
+    if not (run_dir / "lifts.parquet").is_file() and (args.sim_root / "runs" / "replay400" / "lifts.parquet").is_file():
+        log.info("%s not found, using the replay400 slice", run_dir)
+        run_dir = args.sim_root / "runs" / "replay400"
     for path in (run_dir / "lifts.parquet", model_dir / "metrics.json"):
         if not path.is_file():
             log.error("missing %s", path)
             return 1
-    _write("evaluation.json", evaluation(model_dir))
-    _write("check.json", check(run_dir, model_dir))
+    chk = check(run_dir, model_dir)
+    _write("evaluation.json", evaluation(model_dir, chk))
+    _write("check.json", chk)
     _write("explainer.json", explainer(run_dir, model_dir))
     copy_plots(run_dir, model_dir)
     return 0

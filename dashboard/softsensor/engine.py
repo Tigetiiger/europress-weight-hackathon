@@ -24,7 +24,7 @@ class BusyError(RuntimeError):
     """All inference slots stayed busy for SLOT_WAIT_S."""
 # Features shown to the user as "what the model saw" (all backward-looking device signals).
 DISPLAY_FEATURES = ("hours_since_lift", "fill_ffill", "presses_cycle", "p_ewm", "p_max_cycle",
-                    "pressure_kg_m3", "curve_contact_ewm", "oil_temp_c", "temp_c",
+                    "pressure_kg_m3", "curve_contact_ewm", "temp_c",
                     "rain_72h", "rain_exposed_cycle", "frost_days_cycle", "naive_kg_m3")
 
 

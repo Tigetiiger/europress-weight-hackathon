@@ -38,15 +38,14 @@ const largest = (rows) => [...rows].sort((a, b) => Math.abs(diffPct(b)) - Math.a
 function topTable(top) {
   const linkable = state.split === "time";
   return `<div class="table-wrap"><table class="table"><thead><tr><th>${esc(t("ss.col.machine"))}</th><th>${esc(t("ss.col.when"))}</th>
-    <th class="num">${esc(t("ss.col.before"))}</th><th class="num">${esc(t("ss.col.wb"))}</th><th class="num">${esc(t("ss.col.diff"))}</th><th class="num">${esc(t("ss.col.truth"))}</th></tr></thead>
+    <th class="num">${esc(t("ss.col.before"))}</th><th class="num">${esc(t("ss.col.wb"))}</th><th class="num">${esc(t("ss.col.diff"))}</th></tr></thead>
     <tbody>${top.map((r, i) => {
       const d = diffPct(r);
       return `<tr${linkable ? ` class="click" tabindex="0" data-i="${i}"` : ""}>
-        <td class="strong"><span class="dot" style="background:${MAT_COLORS[r.material]}"></span>${esc(r.bin_id)}<span class="desc">${esc(material(r.material))} · ${fmt(r.volume_m3)} m³${r.false_full ? ` · ${esc(t("ss.c.falseFull"))}` : ""}</span></td>
+        <td class="strong"><span class="dot" style="background:${MAT_COLORS[r.material]}"></span>${esc(r.bin_id)}<span class="desc">${esc(material(r.material))} · ${fmt(r.volume_m3)} m³</span></td>
         <td>${esc(fmtTime(r.t))}</td><td class="num strong">${esc(kg(r.pred_kg))}<span class="desc">${esc(fmt(r.p10_kg))}–${esc(fmt(r.p90_kg))}</span></td>
         <td class="num">${esc(kg(r.weighbridge_kg))}</td>
-        <td class="num"><span class="state" data-state="${Math.abs(d) > 10 ? "bad" : "warn"}">${d > 0 ? "+" : ""}${esc(fmt(d, 1))} %</span></td>
-        <td class="num muted-cell">${esc(kg(r.truth_kg))}</td></tr>`;
+        <td class="num"><span class="state" data-state="${Math.abs(d) > 10 ? "bad" : "warn"}">${d > 0 ? "+" : ""}${esc(fmt(d, 1))} %</span></td></tr>`;
     }).join("")}</tbody></table></div>`;
 }
 
@@ -80,7 +79,7 @@ export async function renderCheck(root) {
   let data;
   try { data = await sensorStatic("check"); } catch (e) { root.innerHTML = `<p class="note">${esc(e.message)}</p>`; return; }
   root.innerHTML = `<p class="lead">${esc(t("ss.c.why"))}</p>${controls()}
-    <p class="note hidden" id="ckCaveat" data-state="warn">${esc(t("ss.c.mixedCaveat"))}</p>
+    <p class="note hidden" id="ckCaveat" data-state="warn">${esc(t("ss.c.mixedCaveat", { cov: fmt(summary(toObjects(data.splits.bins).filter((r) => r.material === "mixed_waste")).coverage * 100) }))}</p>
     <div class="kpis" id="ckKpis"></div>
     <div class="grid g-1-1">
       <article class="card"><header class="card-head"><h2>${esc(t("ss.c.scatter"))}</h2></header><div class="chart ss-chart-tall"><canvas id="ckScatter"></canvas></div></article>

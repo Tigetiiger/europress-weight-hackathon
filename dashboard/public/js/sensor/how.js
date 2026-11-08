@@ -14,13 +14,23 @@ function flow(nFeatures) {
 function simFacts(sim) {
   const facts = [
     [t("ss.h.sim.machines"), fmt(sim.machines)], [t("ss.h.sim.days"), fmt(sim.days)], [t("ss.h.sim.rows"), fmt(sim.hourly_rows)],
-    [t("ss.h.sim.lifts"), fmt(sim.lifts)], [t("ss.h.sim.ff"), `${fmt(sim.false_full_share * 100, 1)} %`],
+    [t("ss.h.sim.lifts"), fmt(sim.lifts)],
   ];
   const mass = MATERIALS.filter((m) => sim.lift_mass_by_material[m]).map((m) =>
     `<tr><td>${esc(material(m))}</td><td class="num">${fmt(sim.fleet.material?.[m] ?? null)}</td><td class="num">${fmt(sim.lift_mass_by_material[m].count)}</td><td class="num strong">${fmt(sim.lift_mass_by_material[m].mean)} kg</td></tr>`).join("");
   return `<dl class="stats ss-stats">${facts.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>
     <div class="table-wrap"><table class="table"><thead><tr><th>${esc(t("ss.col.material"))}</th><th class="num">${esc(t("ss.h.sim.machines"))}</th>
     <th class="num">${esc(t("ss.h.sim.lifts"))}</th><th class="num">${esc(t("ss.h.sim.mean"))}</th></tr></thead><tbody>${mass}</tbody></table></div>`;
+}
+
+/** Numbers quoted in the caveats, all measured against weighbridge tickets. */
+function caveatParams(ev) {
+  const lift = (split) => ev?.splits?.[split]?.lift;
+  return {
+    cov: fmt((lift("bins")?.by_material?.mixed_waste?.coverage ?? NaN) * 100),
+    unseen: fmt(lift("bins")?.overall?.mean_pct, 1),
+    seen: fmt(lift("time")?.overall?.mean_pct, 1),
+  };
 }
 
 function gallery(plots) {
@@ -32,8 +42,8 @@ function gallery(plots) {
 
 export async function renderHow(root) {
   root.innerHTML = `<p class="note">${esc(t("ss.loading"))}</p>`;
-  let x;
-  try { x = await sensorStatic("explainer"); } catch (e) { root.innerHTML = `<p class="note">${esc(e.message)}</p>`; return; }
+  let x, ev;
+  try { [x, ev] = await Promise.all([sensorStatic("explainer"), sensorStatic("evaluation")]); } catch (e) { root.innerHTML = `<p class="note">${esc(e.message)}</p>`; return; }
   root.innerHTML = `
     <article class="card"><header class="card-head"><h2>${esc(t("ss.h.flow"))}</h2></header>${flow(x.model.n_features)}</article>
     <div class="grid g-1-1">
@@ -41,7 +51,7 @@ export async function renderHow(root) {
         <div class="chart ss-chart-tall"><canvas id="howCurves"></canvas></div></article>
       <article class="card"><header class="card-head"><h2>${esc(t("ss.h.sim"))}</h2></header>${simFacts(x.simulation)}</article>
     </div>
-    <article class="card"><header class="card-head"><h2>${esc(t("ss.h.limits"))}</h2></header><ul class="ss-caveats">${CAVEATS.map((k) => `<li>${esc(t(k))}</li>`).join("")}</ul></article>
+    <article class="card"><header class="card-head"><h2>${esc(t("ss.h.limits"))}</h2></header><ul class="ss-caveats">${CAVEATS.map((k) => `<li>${esc(t(k, caveatParams(ev)))}</li>`).join("")}</ul></article>
     <article class="card"><header class="card-head"><h2>${esc(t("ss.h.plots"))}</h2></header>${gallery(x.plots)}</article>`;
   curvesChart("howCurves", x.pressure_curves.curves);
 }

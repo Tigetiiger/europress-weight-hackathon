@@ -116,16 +116,14 @@ class SensorApi:
         j = g.hour_index(at)
         m = self.data.machines.set_index("bin_id").reindex(g.bins)
         pred, p10, p90 = g.pred[:, j], g.p10[:, j], g.p90[:, j]
-        fill, hsl, truth = g.fill[:, j], g.hours_since_lift[:, j], g.truth[:, j]
+        fill, hsl = g.fill[:, j], g.hours_since_lift[:, j]
         vol = m["container_volume_m3"].to_numpy(dtype=float)
         rows = [{"bin_id": b, "material": m.at[b, "material"], "region": m.at[b, "region"],
                  "equipment_class": m.at[b, "equipment_class"], "volume_m3": _r(vol[i]),
                  "fill_pct": _r(fill[i]), "hours_since_lift": _r(hsl[i], 0),
                  "mass_kg": _r(pred[i]), "p10_kg": _r(p10[i]), "p90_kg": _r(p90[i]),
-                 "kg_m3": _r(pred[i] / vol[i]) if vol[i] else None, "truth_kg": _r(truth[i])}
+                 "kg_m3": _r(pred[i] / vol[i]) if vol[i] else None}
                 for i, b in enumerate(g.bins)]
-        abs_err = np.abs(pred - truth)
-        covered = (truth >= p10) & (truth <= p90)
         return {
             "at": at.isoformat(), "machines": rows,
             "totals": {
@@ -134,9 +132,6 @@ class SensorApi:
                 "heavy": int(np.sum(p90 >= TRUCK_PAYLOAD_KG)),
                 "mean_fill_pct": _r(np.nanmean(fill)),
             },
-            # simulator truth: only possible in simulation, shown as evaluation
-            "evaluation": {"mae_kg": _r(np.nanmean(abs_err)), "truth_t": _r(np.nansum(truth) / 1000.0, 1),
-                           "coverage": _r(float(np.mean(covered)), 3)},
         }
 
     def machine(self, bin_id: str, query: dict) -> dict:
@@ -162,11 +157,10 @@ class SensorApi:
             "live": live,
             "batch": {"mass_kg": _r(g.pred[i, j]), "p10_kg": _r(g.p10[i, j]), "p90_kg": _r(g.p90[i, j])},
             "now": {"fill_pct": _r(g.fill[i, j]), "hours_since_lift": _r(g.hours_since_lift[i, j], 0)},
-            "truth_kg": _r(g.truth[i, j]),
             "series": {
                 "t": [int(x) for x in (g.hours[span].as_unit("ns").asi8 // 1_000_000)],
                 "mass_kg": _arr(g.pred[i, span]), "p10_kg": _arr(g.p10[i, span]), "p90_kg": _arr(g.p90[i, span]),
-                "fill_pct": _arr(g.fill[i, span]), "truth_kg": _arr(g.truth[i, span]),
+                "fill_pct": _arr(g.fill[i, span]),
             },
             "lifts": self._lifts(bin_id, i, g.hours[j0], at),
         }
@@ -184,8 +178,7 @@ class SensorApi:
                 continue
             out.append({"ts": row.ts.isoformat(), "t": int(row.ts.as_unit("ns").value // 1_000_000), "trigger": row.trigger,
                         "pred_kg": _r(g.pred[i, j]), "p10_kg": _r(g.p10[i, j]), "p90_kg": _r(g.p90[i, j]),
-                        "weighbridge_kg": _r(row.weighbridge_net_kg),
-                        "truth_kg": _r(getattr(row, "true_mass_removed_kg", np.nan))})
+                        "weighbridge_kg": _r(row.weighbridge_net_kg)})
         return out
 
     # ------------------------------------------------------------------ dispatch

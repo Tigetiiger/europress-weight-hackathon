@@ -126,7 +126,6 @@ function techDetails(d) {
     <ul class="ss-checks">
       <li><span class="state" data-state="info">${esc(fmt(live.ms))} ms</span>${esc(t("ss.m.ran", { rows: fmt(live.window.rows), strokes: fmt(live.window.strokes), ms: fmt(live.ms) }))}</li>
       <li><span class="state" data-state="good">${esc(t("ss.m.same"))}</span>${esc(t("ss.m.batch"))}: ${esc(kg(d.batch.mass_kg))}</li>
-      <li><span class="state" data-state="note">sim</span>${esc(t("ss.m.truth"))}: ${esc(kg(d.truth_kg))} · ${esc(d.machine.bin_id)}</li>
     </ul>
     <h3 class="sub-h">${esc(t("ss.m.saw"))}</h3><dl class="ss-inputs">${inputs}</dl></details>`;
 }

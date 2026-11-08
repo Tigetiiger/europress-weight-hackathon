@@ -1,6 +1,6 @@
 """Soft-sensor service tests on the 25-machine dev run (runs/bins25 + models/bins25).
 
-Run:  /home/hackathon/simulator-weather-and-stuff/.venv/bin/python -m pytest softsensor -q
+Run (from dashboard/):  ../.venv/bin/python -m pytest softsensor -q
 """
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ from softsensor.api import ApiError, make_handler
 from softsensor.config import Settings
 from softsensor.stores import PUBLIC_MACHINE_COLUMNS, build_grid, cycle_ids, hours_since_lift, row_ranges
 
-DEV = dataclasses.replace(Settings.from_env(), run="demo40", models="full400")  # shipped slice + weights
+DEV = dataclasses.replace(Settings.from_env(), run="replay400", models="full400")  # replay slice + weights
 
 
 @pytest.fixture(scope="module")
@@ -68,9 +68,8 @@ def test_cycle_ids_start_at_lifts_and_machines():
 def test_grid_fill_is_not_carried_over_an_emptying():
     ts = pd.date_range("2026-07-01", periods=4, freq="h", tz="Europe/Helsinki")
     tel = pd.DataFrame({"bin_id": ["A"] * 4, "ts": ts, "fill_pct": [90.0, np.nan, np.nan, 5.0], "lift_event": [0, 0, 1, 0]})
-    truth = pd.DataFrame({"bin_id": ["A"] * 4, "ts": ts, "true_mass_kg": [1.0] * 4})
     batch = pd.DataFrame({"bin_id": ["A"] * 4, "ts": ts, "mass_pred_kg": 1.0, "mass_p10_kg": 1.0, "mass_p90_kg": 1.0})
-    g = build_grid(tel, truth, batch, ts[0])
+    g = build_grid(tel, batch, ts[0])
     assert g.fill[0, 1] == 90.0           # dropout inside the cycle: forward-filled
     assert np.isnan(g.fill[0, 2])         # emptied: the old 90 % must not leak into the new cycle
     assert g.fill[0, 3] == 5.0
@@ -149,9 +148,27 @@ def test_fleet_snapshot(api):
     out = api.fleet({})
     assert len(out["machines"]) == len(api.data.grid.bins)
     row = out["machines"][0]
-    assert {"bin_id", "mass_kg", "p10_kg", "p90_kg", "fill_pct", "truth_kg"} <= set(row)
+    assert {"bin_id", "mass_kg", "p10_kg", "p90_kg", "fill_pct"} <= set(row)
     assert out["totals"]["mass_t"] > 0
-    assert 0 <= out["evaluation"]["coverage"] <= 1
+
+
+def _keys(obj) -> set:
+    if isinstance(obj, dict):
+        return set(obj) | set().union(*(_keys(v) for v in obj.values()))
+    if isinstance(obj, list):
+        return set().union(*(_keys(v) for v in obj[:5])) if obj else set()
+    return set()
+
+
+def test_responses_carry_no_simulator_truth(api):
+    """Nothing the dashboard receives may be unknowable in reality (true mass, false-full cycles, ...)."""
+    g = api.data.grid
+    at = g.hours[400]
+    payloads = [api.fleet({"at": [at.isoformat()]}), api.meta({}),
+                api.machine(str(g.bins[2]), {"at": [at.isoformat()], "hours": ["720"]})]
+    leaked = {k for p in payloads for k in _keys(p) if "truth" in k or k.startswith("true_") or "false_full" in k}
+    assert not leaked
+    assert "evaluation" not in payloads[0]
 
 
 def test_machine_series_stops_at_at(api):

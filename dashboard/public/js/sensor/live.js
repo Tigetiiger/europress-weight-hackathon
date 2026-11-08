@@ -181,10 +181,10 @@ function kpiCard(label, value, unit, sub, primary = false) {
 function renderKpis(f) {
   const th = state.meta.thresholds;
   q("#ssKpis").innerHTML = [
-    kpiCard(t("ss.k.mass"), fmt(f.totals.mass_t, 1), "t", t("ss.k.massSub", { t: fmt(f.evaluation.truth_t, 1) }), true),
+    kpiCard(t("ss.k.mass"), fmt(f.totals.mass_t, 1), "t", t("ss.k.massSub"), true),
     kpiCard(t("ss.k.ready"), fmt(f.totals.ready_to_empty), "", t("ss.k.readySub", { pct: th.order_fill_pct })),
     kpiCard(t("ss.k.heavy"), fmt(f.totals.heavy), "", t("ss.k.heavySub", { t: fmt(th.truck_payload_kg / 1000) })),
-    kpiCard(t("ss.k.err"), fmt(f.evaluation.mae_kg), "kg", t("ss.k.errSub", { cov: fmt(f.evaluation.coverage * 100) })),
+    kpiCard(t("ss.k.fill"), fmt(f.totals.mean_fill_pct, 0), "%", t("ss.k.fillSub")),
   ].join("");
 }
 
@@ -204,8 +204,7 @@ function fleetRow(r) {
     <td class="num strong">${esc(kg(r.mass_kg))}</td>
     <td class="num muted-cell">${esc(fmt(r.p10_kg))}–${esc(fmt(r.p90_kg))}</td>
     <td class="num">${esc(fmt(r.kg_m3))}</td>
-    <td class="num">${esc(since(r.hours_since_lift))}</td>
-    <td class="num muted-cell">${esc(kg(r.truth_kg))}</td></tr>`;
+    <td class="num">${esc(since(r.hours_since_lift))}</td></tr>`;
 }
 
 function renderFleet() {
@@ -219,7 +218,7 @@ function renderFleet() {
   q("#ssFleet").innerHTML = `<div class="table-wrap"><table class="table">
     <thead><tr><th>${esc(t("ss.col.machine"))}</th><th>${esc(t("ss.col.material"))}</th><th>${esc(t("ss.col.fill"))}</th>
       <th class="num">${esc(t("ss.col.est"))}</th><th class="num">${esc(t("ss.col.band"))}</th><th class="num">${esc(t("ss.col.density"))}</th>
-      <th class="num">${esc(t("ss.col.since"))}</th><th class="num">${esc(t("ss.col.truth"))}</th></tr></thead>
+      <th class="num">${esc(t("ss.col.since"))}</th></tr></thead>
     <tbody>${shown.map(fleetRow).join("")}</tbody></table></div>
     ${more > 0 ? `<button type="button" class="btn ghost ss-more" id="ssMore">${esc(t("ss.more", { n: Math.min(PAGE, more) }))}</button>` : ""}`;
   q("#ssFleet").querySelectorAll("tr[data-bin]").forEach((tr) => {
@@ -269,7 +268,6 @@ function renderMachineHead(m) {
 function renderNow(m) {
   const live = m.live, b = m.batch;
   const same = b.mass_kg != null && Math.abs(live.mass_kg - b.mass_kg) <= Math.max(0.5, b.mass_kg * 1e-4);
-  const err = m.truth_kg ? ((live.mass_kg - m.truth_kg) / m.truth_kg) * 100 : null;
   const setup = t(`ss.m.setup.${live.model.setup}`, { group: material(live.model.group) });
   const inputs = Object.entries(live.inputs).map(([k, v]) => `<div><dt>${esc(t(`ss.in.${k}`))}</dt><dd>${esc(v == null ? "–" : fmt(v, Math.abs(v) < 10 ? 2 : 0))}</dd></div>`).join("");
   q("#ssNowCard").innerHTML = `<header class="card-head"><div><h2>${esc(t("ss.m.now"))}</h2><p class="muted">${esc(fmtTime(Date.parse(m.at)))}</p></div></header>
@@ -278,7 +276,6 @@ function renderNow(m) {
     <ul class="ss-checks">
       <li><span class="state" data-state="info">${esc(fmt(live.ms))} ms</span>${esc(live.cached ? t("ss.m.cached") : t("ss.m.ran", { rows: fmt(live.window.rows), strokes: fmt(live.window.strokes), ms: fmt(live.ms) }))}</li>
       <li><span class="state" data-state="${same ? "good" : "warn"}">${esc(same ? t("ss.m.same") : t("ss.m.differs"))}</span>${esc(t("ss.m.batch"))}: ${esc(kg(b.mass_kg))}</li>
-      <li><span class="state" data-state="note">sim</span>${esc(t("ss.m.truth"))}: ${esc(kg(m.truth_kg))} · ${esc(t("ss.m.truthErr", { err: err == null ? "–" : `${err > 0 ? "+" : ""}${fmt(err, 1)} %` }))}</li>
     </ul>
     <p class="fine">${esc(t("ss.m.model", { setup, n: live.model.n_features }))}</p>
     <h3 class="sub-h">${esc(t("ss.m.saw"))}</h3>
@@ -294,12 +291,10 @@ function renderLifts(m) {
     return `<tr><td>${esc(fmtTime(l.t))}</td><td>${esc(t(`ss.trigger.${l.trigger}`))}</td>
       <td class="num strong">${esc(kg(l.pred_kg))}<span class="desc">${esc(fmt(l.p10_kg))}–${esc(fmt(l.p90_kg))}</span></td>
       <td class="num">${esc(kg(l.weighbridge_kg))}</td>
-      <td class="num"><span class="state" data-state="${st}">${d == null ? "–" : `${d > 0 ? "+" : ""}${esc(fmt(d, 1))} %`}</span></td>
-      <td class="num muted-cell">${esc(kg(l.truth_kg))}</td></tr>`;
+      <td class="num"><span class="state" data-state="${st}">${d == null ? "–" : `${d > 0 ? "+" : ""}${esc(fmt(d, 1))} %`}</span></td></tr>`;
   }).join("");
   target.innerHTML = `<div class="table-wrap"><table class="table"><thead><tr><th>${esc(t("ss.col.when"))}</th><th>${esc(t("ss.col.trigger"))}</th>
-    <th class="num">${esc(t("ss.col.before"))}</th><th class="num">${esc(t("ss.col.wb"))}</th><th class="num">${esc(t("ss.col.diff"))}</th>
-    <th class="num">${esc(t("ss.col.truth"))}</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    <th class="num">${esc(t("ss.col.before"))}</th><th class="num">${esc(t("ss.col.wb"))}</th><th class="num">${esc(t("ss.col.diff"))}</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
 function renderMachine(m) {

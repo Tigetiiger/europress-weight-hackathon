@@ -1,10 +1,11 @@
-// Model evaluation: pilot fleet (time split) vs new installations (bins split), ladder, learning curve, drivers.
+// Model evaluation: pilot fleet (time split) vs new installations (bins split), and what drives the estimate.
+// Every accuracy figure is the estimate 1 h before an emptying vs the weighbridge ticket — what can be measured in
+// reality. Truth-based analyses (hourly error, signal ladder, learning curve) live in the technical docs only.
 import { t, fmt, addStrings } from "../i18n.js";
 import { esc } from "../drawer.js";
 import { sensorStatic, material, MATERIALS, pct } from "./api.js";
-import { ladderChart, learningChart, importanceChart } from "./charts.js";
+import { importanceChart } from "./charts.js";
 
-const LADDER = ["naive_fill_x_density", "fill_presses", "pressure", "pressure_graph", "full_shared", "full_per_material", "full_selected"];
 const TOP_DRIVERS = 12;
 const COVERAGE_LOW = 0.7;
 const state = { mat: "cardboard", source: "importance" };
@@ -45,16 +46,14 @@ const share = (v) => (v == null ? "–" : `${fmt(v * 100)} %`);
 
 function headlineTable(e) {
   const s = e.splits;
-  const naive = (k) => s[k]?.ladder?.naive_fill_x_density?.all?.mean_pct;
   const rows = [
     ["ss.mo.liftErr", (k) => pct(s[k].lift.overall.mean_pct, 2), true],
     ["ss.mo.liftMed", (k) => pct(s[k].lift.overall.median_pct, 2)],
     ["ss.mo.w5", (k) => share(s[k].lift.overall.within_5pct)],
     ["ss.mo.w10", (k) => share(s[k].lift.overall.within_10pct)],
     ["ss.mo.cov", (k) => share(s[k].lift.overall.coverage)],
-    ["ss.mo.hourMae", (k) => `${fmt(s[k].hourly.overall.mae_kg)} kg`],
+    ["ss.mo.n", (k) => fmt(s[k].lift.overall.n)],
     ["ss.mo.machines", (k) => `${fmt(s[k].n_train_machines)} / ${fmt(s[k].n_test_machines)}`],
-    ["ss.mo.naive", (k) => pct(naive(k), 1)],
   ];
   const splits = ["time", "bins"].filter((k) => s[k]);
   return `<div class="table-wrap"><table class="table ss-compare"><thead><tr><th>${esc(t("ss.mo.metric"))}</th>${
@@ -98,18 +97,12 @@ export async function renderModel(root) {
   try { e = await sensorStatic("evaluation"); } catch (err) { root.innerHTML = `<p class="note">${esc(err.message)}</p>`; return; }
   const mats = MATERIALS.map((m) => `<button type="button" data-mat="${m}">${esc(material(m))}</button>`).join("");
   root.innerHTML = `
-    <article class="card"><header class="card-head"><h2>${esc(t("ss.mo.head"))}</h2></header>${headlineTable(e)}${computeFacts(e.compute)}</article>
+    <article class="card"><header class="card-head"><div><h2>${esc(t("ss.mo.head"))}</h2><p class="muted">${esc(t("ss.mo.ref"))}</p></div></header>${headlineTable(e)}${computeFacts(e.compute)}</article>
     <article class="card"><header class="card-head"><h2>${esc(t("ss.mo.byMat"))}</h2></header>${materialTable(e)}
-      <p class="note" data-state="warn">${esc(t("ss.c.mixedCaveat"))}</p></article>
-    <div class="grid g-1-1">
-      <article class="card"><header class="card-head"><div><h2>${esc(t("ss.mo.ladder"))}</h2><p class="muted">${esc(t("ss.mo.ladder.sub"))}</p></div></header><div class="chart ss-chart-tall"><canvas id="moLadder"></canvas></div></article>
-      <article class="card"><header class="card-head"><div><h2>${esc(t("ss.mo.learn"))}</h2><p class="muted">${esc(t("ss.mo.learn.sub"))}</p></div></header><div class="chart ss-chart-tall"><canvas id="moLearn"></canvas></div></article>
-    </div>
+      <p class="note" data-state="warn">${esc(t("ss.c.mixedCaveat", { cov: fmt((e.splits.bins?.lift.by_material.mixed_waste?.coverage ?? NaN) * 100) }))}</p></article>
     <article class="card"><header class="card-head"><div><h2>${esc(t("ss.mo.imp"))}</h2><p class="muted">${esc(t("ss.mo.imp.sub"))}</p></div>
       <div class="head-actions"><div class="seg ss-wrap" id="moImpMat">${mats}</div><div class="seg" id="moImpSrc"><button type="button" data-src="importance">${esc(t("ss.mo.imp.gain"))}</button><button type="button" data-src="shap">${esc(t("ss.mo.imp.shap"))}</button></div></div></header>
       <div class="chart ss-chart-tall"><canvas id="moImp"></canvas></div></article>`;
-  ladderChart("moLadder", e.splits, LADDER);
-  learningChart("moLearn", e.learning_curve);
   root.querySelector("#moImpMat").addEventListener("click", (ev) => {
     const b = ev.target.closest("button[data-mat]");
     if (b) { state.mat = b.dataset.mat; drawDrivers(root, e); }

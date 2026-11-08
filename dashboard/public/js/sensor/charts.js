@@ -6,10 +6,8 @@ import { MAT_COLORS, MATERIALS, material, fmtDay, fmtTime, kg } from "./api.js";
 const INK = "#000d61";
 const GRID = "#e2e5ec";
 const BAND = "rgba(0, 13, 97, .10)";
-const TRUTH = "#8a8fa3";
 const FILL = "#4ea3b8";
 const LIFT = "#9a6a00";
-const SPLIT_COLORS = { time: INK, bins: "#9aa3c7" };
 const charts = new Map();
 
 const axis = (extra = {}) => ({ grid: { color: GRID }, border: { display: false }, ...extra });
@@ -39,7 +37,7 @@ export function destroyChart(id) {
 const xy = (ts, ys) => ts.map((x, i) => ({ x, y: ys[i] }));
 
 /**
- * Hourly mass with the p10–p90 band, simulator truth, device fill (right axis) and weighbridge tickets.
+ * Hourly mass with the p10–p90 band, device fill (right axis) and weighbridge tickets.
  * `customer: true` shows only our estimate, its band and the fill: the customer gets the approximate weight,
  * never a comparison with the operator's ticket (operators are Europress's partners).
  */
@@ -52,7 +50,6 @@ export function massChart(id, s, lifts, { customer = false } = {}) {
         { label: "p10", data: xy(s.t, s.p10_kg), borderWidth: 0, pointRadius: 0, fill: false, _hide: true },
         { label: t("ss.m.band"), data: xy(s.t, s.p90_kg), borderWidth: 0, pointRadius: 0, fill: "-1", backgroundColor: BAND },
         { label: t("ss.m.estimate"), data: xy(s.t, s.mass_kg), borderColor: INK, backgroundColor: INK, borderWidth: 2, pointRadius: 0 },
-        ...(customer ? [] : [{ label: t("ss.m.truth"), data: xy(s.t, s.truth_kg), borderColor: TRUTH, backgroundColor: TRUTH, borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0 }]),
         { label: t("ss.m.fill"), data: xy(s.t, s.fill_pct), yAxisID: "y1", borderColor: FILL, backgroundColor: FILL, borderWidth: 1, pointRadius: 0, stepped: true },
         ...(customer ? [] : [{ type: "scatter", label: t("ss.m.lift"), data: lifts.map((l) => ({ x: l.t, y: l.weighbridge_kg })),
           backgroundColor: LIFT, borderColor: "#fff", borderWidth: 1.5, pointRadius: 6, pointStyle: "rectRot" }]),
@@ -128,43 +125,6 @@ export function errorHistogram(id, diffs, limit = 15) {
         title: (items) => `${items[0].label} … ${Number(items[0].label) + 1} %`, label: (c) => `${fmt(c.raw)} ${t("ss.c.n")}`,
       } } },
       scales: { x: axis({ grid: { display: false }, ticks: { maxTicksLimit: 11 } }), y: axis({ ticks: { precision: 0 } }) },
-    },
-  });
-}
-
-/** Ladder: mean % error per step, pilot fleet vs new installations. */
-export function ladderChart(id, splits, steps) {
-  const datasets = Object.entries(splits).map(([split, s]) => ({
-    label: t(`ss.split.${split}`), backgroundColor: SPLIT_COLORS[split], borderRadius: 4, maxBarThickness: 16,
-    data: steps.map((step) => s.ladder[step]?.all?.mean_pct ?? null),
-  }));
-  return upsert(id, {
-    type: "bar",
-    data: { labels: steps.map((s) => t(`ss.step.${s}`)), datasets },
-    options: {
-      indexAxis: "y", animation: false,
-      plugins: { legend: { position: "bottom" }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${fmt(c.raw, 1)} %` } } },
-      scales: { x: axis({ min: 0, ticks: { callback: (v) => `${v} %` } }), y: axis({ grid: { display: false } }) },
-    },
-  });
-}
-
-export function learningChart(id, curve) {
-  const keys = ["all", ...MATERIALS].filter((k) => curve[k]?.length);
-  return upsert(id, {
-    type: "line",
-    data: { datasets: keys.map((k) => ({
-      label: material(k), data: curve[k].map(([x, y]) => ({ x, y })),
-      borderColor: k === "all" ? INK : MAT_COLORS[k], backgroundColor: k === "all" ? INK : MAT_COLORS[k],
-      borderWidth: k === "all" ? 3 : 1.5, pointRadius: 3, tension: .25,
-    })) },
-    options: {
-      animation: false,
-      plugins: { legend: { position: "bottom" }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${fmt(c.parsed.y, 1)} %` } } },
-      scales: {
-        x: axis({ type: "logarithmic", title: { display: true, text: t("ss.mo.learn.x") }, ticks: { callback: (v) => ([10, 25, 50, 100, 300].includes(v) ? v : "") } }),
-        y: axis({ min: 0, ticks: { callback: (v) => `${v} %` } }),
-      },
     },
   });
 }
